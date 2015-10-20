@@ -1,0 +1,7 @@
+The following variables should be changed to match your system configuration:
+
+- KERNEL_MODULE_EVRMA in configure/CONFIG_SITE.Common.xxxx should point
+  to the evrmaDriver directory.
+  
+- EVRMA in configure/CONFIG_SITE.Common.xxxx should point to the installed evrma
+  library.
