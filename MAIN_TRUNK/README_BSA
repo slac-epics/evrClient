@@ -1,0 +1,157 @@
+Beam-Synchronous-Acquisition (BSA) Comments for IOC Engineers    08/05/2009
+-------------------------------------------------------------
+
+Many IOC engineers use record processing to provide input to 
+beam-synchronous-acquisition (BSA).  If we want to continue doing BSA 
+this way (ie, instead of going to something like what fast feedback is 
+doing to get synchronized data), then it's important that records be 
+processed within 7 msec after beam, for eventual 120hz processing.  We 
+can start another thread for a better BSA design.
+
+But for now, it's important that IOC engineers design their software 
+and databases to achieve this 7msec for much of the time.  Over the 
+last year, I've found some improvements that people can make to their 
+applications for better database processing:
+
+(1) Make sure the task that is processing the triggered records that 
+are input to BSA is running at a high priority.  For instance, if your 
+record is being processed by an EPICS callback task (ie, SCAN is set to 
+"I/O Intr"), set the PRIO of that record to "HIGH".  The default is 
+"LOW" which means your records are processed at a lower priority than 
+the periodic scan tasks (ie, your "1 second" records are running at a 
+higher priority than your triggered 120hz records).  Note that the 
+IP330 ADC uses the EPICS callback task for processing your records so 
+set PRIO=HIGH for those.  Anything using scanIoRequest to process 
+records use the EPICS callback tasks.
+
+(3) Make sure the lock set containing your triggered (ie, 120hz) records 
+does not contain too many records and especially does not contain 
+popular records used by many CA clients.   When many records are linked 
+together (INP, OUT, FLNK, and other links), they are all put in the same 
+record lock set.  That means that whenever a task (like CA or a sequence 
+or another record processing task) wants to get or put to ANY record in 
+the lock set, all the records in the lock set are locked until the task 
+is finished with the get/put.  This means that a very low priority task 
+like CA can stall high priority tasks like the cbHigh (though one would 
+think it won't stall for long but experience is showing otherwise).  So 
+when CA traffic increases, it can affect our 120hz processing.
+
+Use the dblsr tool on the IOC to determine how many records are in the 
+same lock set as your triggered record.  Chapter 9.13.1 of the app dev 
+guide has a description of this utility - there is also a section in the 
+app dev guide that talks about the hows and whys of lock sets.
+
+I've been able to break lock sets by processing records using SCAN 
+processing  of "I/O Intr" and "Event" but it means adding extra code to 
+do the necessary scanIoRequest and post_event and to use memory or 
+queues to transfer data.  
+
+(4) Don't use the seq record for any processing done at a high rate - seq 
+is deadly to real-time processing since it keeps the lock set locked 
+while adding extra task switches to do delay processing.  Use seq only 
+for slow user-related actions.
+
+(5) Try to keep your fast records off of EDM displays, Striptool, ALH, 
+Archiver, and if possible, any "abusive" app.   If you have BSA, consider 
+using the <record-name>1H and <record-name>TH (1hz and 10hz) records for 
+EDM displays.  These records are purposefully designed NOT to be part of 
+the lock-set containing the triggered data.  Unfortunately, the "1H" and 
+"TH" records remain at the last good value when beam goes away and so may 
+not be the best for certain displays.  You may want to design your own 
+diagnostics records that are in a separate lock set (ie, don't just 
+provide an 1 second ai record with INP link to your fast record - that 
+puts it in the same lock set).
+
+(6) If your record is rate-limited (ie, triggers at 10hz) and takes longer 
+than 7msec after beam to process but you still want it in BSA, then set the 
+TSE field of the record that is input to BSA to the event code that is 
+triggers the device providing the data.  The event code must have the VME 
+IRQ set so that timestamp is available.  Then rate-limited BSAs can still 
+correlate that slow data with the faster data from other IOCs.
+
+(7) Check that your records are being properly timestamped.  As a start, 
+use camonitor to monitor the IOC pattern pulse ID, time slot, and your 
+triggered record.  For example:
+
+[iocegr@lcls-builder work]$ camonitor IOC:IN20:IM01:PATTERN.L IOC:IN20:IM01:PATTERN.C TORO:IN20:431:TMIT
+
+<ioc>:PATTERN.L = pulse ID,  <ioc>:PATTERN.C = time slot, 
+TORO:...:TMIT = record that is triggered by event code 140.
+
+has partial results:
+
+IOC:IN20:IM01:PATTERN.C        2009-08-03 17:04:13.852633 1 
+IOC:IN20:IM01:PATTERN.L        2009-08-03 17:04:13.852633 9762 
+IOC:IN20:IM01:PATTERN.C        2009-08-03 17:04:13.860891 4 
+IOC:IN20:IM01:PATTERN.L        2009-08-03 17:04:13.860891 9765 
+IOC:IN20:IM01:PATTERN.C        2009-08-03 17:04:13.869279 1 
+IOC:IN20:IM01:PATTERN.L        2009-08-03 17:04:13.869279 9768 
+IOC:IN20:IM01:PATTERN.C        2009-08-03 17:04:13.877537 4 
+IOC:IN20:IM01:PATTERN.L        2009-08-03 17:04:13.877537 9771 
+TORO:IN20:431:TMIT             2009-08-03 17:04:13.877537 0.0344091 
+IOC:IN20:IM01:PATTERN.C        2009-08-03 17:04:13.885925 1 
+IOC:IN20:IM01:PATTERN.L        2009-08-03 17:04:13.885925 9774 
+IOC:IN20:IM01:PATTERN.C        2009-08-03 17:04:13.894314 4 
+IOC:IN20:IM01:PATTERN.L        2009-08-03 17:04:13.894314 9777 
+IOC:IN20:IM01:PATTERN.C        2009-08-03 17:04:13.902572 1 
+IOC:IN20:IM01:PATTERN.L        2009-08-03 17:04:13.902572 9780 
+IOC:IN20:IM01:PATTERN.C        2009-08-03 17:04:13.910960 4 
+IOC:IN20:IM01:PATTERN.L        2009-08-03 17:04:13.910960 9783 
+TORO:IN20:431:TMIT             2009-08-03 17:04:13.910960 -0.00702248 LOW MINOR
+
+The timestamp of the TORO record is exactly matching the timestamp of the 
+PATTERN PVs and happens on time slot 4 when there is beam.  Add 
+<ioc>:MODIFIER5.R which goes to 1 on beam pulses.
+
+Also use camonitor to check that the 1H, TH, and BR records (1 hz, 10 hz, 
+and beam-rate records) are coming out at the proper rate.
+
+(8) After adding BSA records, make sure BSA is working by reserving an 
+EDEF, doing an acquisition, and checking NUSE of the resultant waveforms.  
+To reserve the EDEF (do this when there is beam):
+lclshome -> Global Event display -> Event Definitions...
+Type your name in the "EDEF Reserve" box.  Look below to find which EDEF is 
+assigned to you.   Click on that EDEF box which will bring up the EDEF setup 
+display.  On that display, enter 2800 for "# Measurements".   If your device 
+is rate-limited, bring up the "Mask Setup" display and choose (include) 
+"ONE_HERTZ" or "TEN_HERTZ", depending on your device.  From the EDEF setup 
+display, push "ON" to start the acquisition.   Watch the 
+"Total Acquired so far" increment.  Wait for the control to go back to "OFF".  
+Check NUSE of the resultant waveforms.  For example, if your EDEF is 
+number 3, check <device_name>HST3.NUSE (ie, TORO:IN20:431:TMITHST3.NUSE).  
+NUSE must be 2800.  Repeat the test a few times to make sure the results are 
+consistent.  Also, do the test when things are the busiest and when your IOC 
+is being pounded.  Push the "Release EDEF" button when finished.
+
+(9) Remind people who want to do BSA with rate-limited devices that they 
+need to set the appropriate rate-limit bit (ie, "ONE_HERTZ" or "TEN_HERTZ" 
+for devices limited to 1hz or 10hz) when setting up the event measurement 
+definition (EDEF).   If they don't, they won't get a matching data set 
+across IOCs.
+
+(10) People who do BSA must check that the number of values in all acquired 
+BSA waveforms (the .NUSE field) exactly match the number of measurements 
+they asked for.  If it doesn't match, they need to throw away the data that 
+doesn't match or redo the acquisition.  Note that since we are using record 
+processing for BSA, we cannot guarantee 100% match every single time.
+
+
+(11) To setup your databases for a BSA PV:
+(11.1) Add the event module to you IOC application
+(11.2) Fill in one of the templates provided in event/MAIN_TRUNK/evrSupport/Db, such as ./bsa/bsaATTREdef.substitutions.  Example:
+
+softegr@lcls-builder /usr/local/lcls/epics/iocTop/BeamContainment/MAIN_TRUNK/bcsApp/Db>cat IOC-DMP1-BC01bsa.substitutions
+file bsaATTREdef.db
+{
+pattern { D , ATTR , LOC  , UN , SLCLNK , EG , HO , LO , PR , AD , MD , I , LNK }
+        { TORO:DMP1:399 , TMIT , DMP1 , BC01 , ""  , Nel ,   5 , 0 , 5e+07 , -1 , 0 , TORO:DMP1:399:TMIT , "" }
+        { TORO:DMP1:685 , TMIT , DMP1 , BC01 , ""  , Nel ,   5 , 0 , 5e+07 , -1 , 0 , TORO:DMP1:685:TMIT , "" }
+        { TORO:DMP1:399 , CHRG , DMP1 , BC01 , ""  , pC  , 400 , 0 , 2     , -1 , 0 , TORO:DMP1:399:CHRG , "" }
+        { TORO:DMP1:685 , CHRG , DMP1 , BC01 , ""  , pC  , 400 , 0 , 2     , -1 , 0 , TORO:DMP1:685:CHRG , "" }
+
+}
+
+(11.3) Add FLNK to prim:loca:unit:EF<your-bsa-signal-name> from your BSA PV. Example: TORO:DMP1:399:TMIT.FLNK = TORO:DMP1:399:EFTMIT
+(11.4) Add a database to your application's Db/Makefile named similar to the file created in step 2, but with the ".db" extension.  Example: DB += IOC-DMP1-BC01bsa.db
+(11.5) Load you database in your IOC with dbLoadRecords.  Example: dbLoadRecords("db/IOC-DMP1-BC01bsa.db")
+

@@ -1,0 +1,85 @@
+#==============================================================================
+# Abs:  LCLS EVR records for PCIe EVRs
+#
+# Name: EvrPci.substitutions
+#
+# Macros:
+#
+#   evr.db - instantiates an EVR record.
+#	Associated display is evrDiagsPCI.edl.
+#	DEV	Name of EVR - EVR:<loca>:<unit>
+#	CARD	EVR card number starting at 0 (matches card number in ErConfigure).
+#
+#	evrEventCtrl.db - instantiates a record for an EVR event.
+#	Associated display is evrTriggerDiagsPCI.edl.
+#	DEV	Name of EVR - EVR:<loca>:<unit>
+#	CARD	EVR card number starting at 0 (matches card number in ErConfigure).
+#
+#  Optional:
+#   SYS     SYS code for the system where this EVR is deployed:
+#       SYS0 for LCLS
+#       SYS1 for FACET
+#       SYS2 for LCLS II
+#	IDn	Defining SYS will select the most commonly used event code numbers for the
+#       specific system. To override these defaults, define IDn where n is 1-14.
+#       Event code number.  To find all available event codes:
+#		lclshome -> Event -> Events... (in the EVG IOC bo14).
+#		This display brings up all the event that are beam-dependent.
+#	        For events that are beam-independent (constant or standby), select
+#		"Time Slot 1 to 6 Event Codes".  Find the event that you want to trigger one or
+#		more devices connected to the EVR.  Use number in the Event Code column.
+#		Also check sharepoint spreadsheet:
+#		Controls -> Timing -> timingEventCodes
+#		NOTE: There is a dependency on event code assignments and triggers.
+#     		When changing event code assignments below, also change the appropriate
+#    		<ioc>trig.substitutions file!
+#		NOTE: If you don't need to use all 14 event codes, populate the spare records
+#		with other event codes from the "Time Slot 1 to 6 Event Codes" display.
+#
+#==============================================================================
+#Edit Log:
+# 01/29/2008 Karey Krauter (KEK) Disable Event1 140 for P0-P6.  Enable Event1 140 for VME.
+#                                Enable Event4 40 for P0-P6.  Per Stephanie/Till.
+#
+#==============================================================================
+#
+file evrWithFrontPanelPmc.db
+{
+#                               Default Pulse
+#	  Device         Card   Delay   Width (clock ticks)
+pattern { DEV          , CARD , DELAY , WIDTH ,	FP0, 	FP1, 	FP2, 	FP3 }
+	{ '$(EVR)'       ,'$(CRD=0)',  0   ,  12    ,	0 ,	1  , 	2  ,	3   }
+}
+file evrEventCtrl.db
+{
+#	  Device         Card  <----------------------------  Event -------------------------->
+pattern { DEV          , CARD , NAME    , ID ,P0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,VME}
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT1  ,"\$(ID1=\$(\$(SYS)_ID1)\,SYS0_ID1=140\,SYS1_ID1=201\,SYS2_ID1=201)",
+											 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 1}
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT2  ,"\$(ID2=\$(\$(SYS)_ID2)\,SYS0_ID2=20\,SYS1_ID2=202\,SYS2_ID2=202)",
+											 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT3  , "\$(ID3=\$(\$(SYS)_ID3)\,SYS0_ID3=30\,SYS1_ID3=203\,SYS2_ID3=203)",
+											 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT4  , "\$(ID4=\$(\$(SYS)_ID4)\,SYS0_ID4=40\,SYS1_ID4=211\,SYS2_ID4=211)",
+											  , 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT5  , "\$(ID5=\$(\$(SYS)_ID5)\,SYS0_ID5=41\,SYS1_ID5=212\,SYS2_ID5=212)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT6  , "\$(ID6=\$(\$(SYS)_ID6)\,SYS0_ID6=42\,SYS1_ID6=50\,SYS2_ID6=50)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT7  , "\$(ID7=\$(\$(SYS)_ID7)\,SYS0_ID7=43\,SYS1_ID7=51\,SYS2_ID7=51)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT8  , "\$(ID8=\$(\$(SYS)_ID8)\,SYS0_ID8=44\,SYS1_ID8=52\,SYS2_ID8=52)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT9  , "\$(ID9=\$(\$(SYS)_ID9)\,SYS0_ID9=45\,SYS1_ID9=53\,SYS2_ID9=53)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT10 , "\$(ID10=\$(\$(SYS)_ID10)\,SYS0_ID10=46\,SYS1_ID10=54\,SYS2_ID10=54)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT11 , "\$(ID11=\$(\$(SYS)_ID11)\,SYS0_ID11=151\,SYS1_ID11=55\,SYS2_ID11=55)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT12 , "\$(ID12=\$(\$(SYS)_ID12)\,SYS0_ID12=153\,SYS1_ID12=56\,SYS2_ID12=56)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT13 , "\$(ID13=\$(\$(SYS)_ID13)\,SYS0_ID13=154\,SYS1_ID13=21\,SYS2_ID13=21)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+	{ '$(EVR)'       ,'$(CRD=0)',EVENT14 , "\$(ID14=\$(\$(SYS)_ID14)\,SYS0_ID14=155\,SYS1_ID14=22\,SYS2_ID14=22)",
+											  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 , 0 , 0, 0 , 0 , 0 }
+}

@@ -1,0 +1,13 @@
+#==============================================================================
+#
+# Abs:  EVR Records with macros for individual delays
+#
+# Name: evrWithDelays.substitutions
+#
+#==============================================================================
+#
+file evr.template 
+{
+pattern {   EVR ,  C    ,F0,F1,F2,F3,  OTP   ,  OTW   ,  OTD0   ,  OTD1   ,  OTD2   ,  OTD3   ,  OTD4   ,  OTD5   ,  OTD6   ,  OTD7   ,  OTD8   ,  OTD9   ,  OTDA   ,  OTDB   ,  OTDC   ,  OTDD   ,   DGE  ,  DGW0  ,  DGW1  ,  DGW2  ,  DGD0   ,  DGD1   ,  DGD2   ,DGC0,DGC1,DGC2, DGP0 , DGP1 , DGP2 }
+	{ $(DEV),$(CARD), 0, 1, 2, 3,Disabled,$(WIDTH),$(DELAY0),$(DELAY1),$(DELAY2),$(DELAY3),$(DELAY4),$(DELAY5),$(DELAY6),$(DELAY7),$(DELAY8),$(DELAY9),$(DELAYA),$(DELAYB),$(DELAYC),$(DELAYD),Disabled,$(WIDTH),$(WIDTH),$(WIDTH),$(DELAY0),$(DELAY1),$(DELAY2),  1 ,  1 ,  1 ,Normal,Normal,Normal}
+}

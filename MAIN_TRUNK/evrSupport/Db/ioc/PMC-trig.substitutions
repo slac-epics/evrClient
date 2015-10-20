@@ -1,0 +1,61 @@
+#=============================================================================
+#
+# Abs:  Trigger records for PMC-EVR front panel
+#
+# Name: PMC-trig.substitutions
+#
+# Associated Display: evnt_trig_VME.edl, or evnt_trig_PMC_noTTB.edl with no rear transition board
+#
+# Rem:  Instantiate one line for every trigger channel including ones not used.
+# There should be 3 lines for a PMC EVR without a transition module for the 3 front panel triggers.
+#
+# Macros:
+#   SYS     SYS code for the system where this EVR is deployed:
+#       SYS0 for LCLS
+#       SYS1 for FACET
+#       SYS2 for LCLS II
+#	LOCA	Location of the EVR that triggers the device.  It is the second part of the
+#		EVR:<loca>:<unit>:CTRL record instantiated with EvrPmc.db.
+#	UNIT	Unit number of the EVR instantiated in EvrPmc.db. Format is xxyy,
+#       where xx = subsystem and yy is 01, 02, etc.
+#
+#   Optional:
+#	DEV	Leave undefined for general purpose triggers.
+#       If this is undefined, trigger PV names will start with "TRIG:<loca>:<unit>:".
+#       Define this to give trigger PVs the names "$(DEV):0" through "$(DEV):2",
+#       that is, replace "TRIG:<loca>:<unit>:" with "$(DEV):".
+#   DEVn where n is 0-2. Use these to individually set channel PV names. Give the
+#       name of the device being triggered up to and including the 3rd colon.
+#		Add a qualifying name after the 3rd colon, if necessary, to keep the name unique.
+#		If the trigger channel is not used, use "TRIG:<loca>:<unit>:"
+#		where <loca> is the location of your IOC and <unit> is xxyy, where xx = subsystem
+#		and yy is 01, 02, etc.
+#	IOC	Name of IOC that contains the EVR, not including the 3rd colon.
+#
+#-----------------------------------------------------------------------------
+# Mod:
+#       19-Jan-2012, T. Lahey          (LAHEY):
+#          Add EVR and FILE tags to generate event edl files
+#          & change DESC values to production event file evnt_wireScan.edl
+#==============================================================================
+#
+# ======================================================================
+# The four comments below are used to generate EDM displays for timing
+# ======================================================================
+#EVR $(EVR)
+#FILE evnt_trig_PMC
+#BODY_TEXT PMC EVR front panel
+#CONTROLPV1 SIOC:$(SYS):AL00:MODE
+#CONTROLPV2 SIOC:$(SYS):AL00:TOD
+# ======================================================================
+
+file evrDevTrig.db
+{
+#           Device	   , Description    ,polarity,width,delay,event , EVR  , EVR,  IOC
+#			                                         code   ,location,unit
+  pattern { DEV                      , CH, DESC          , POL, WID, DES,  LOCA ,   UNIT     , IOC     ,  DRVL  ,  DRVH   , TCTL     , TPOL    , TWID    , TDES    , CTL, TOUT    , SYS  }
+	  { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)F):",  0, "Channel $(CH)", 0 , 100, 10 , '$(LOCA)','$(UNIT)', '$(IOC)', -2.8E06, 2.8E06  , DG$(CH)E , DG$(CH)P, DG$(CH)W, DG$(CH)D, 1  , OUT$(CH), '$(SYS)' }
+	  { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)F):",  1, "Channel $(CH)", 0 , 100, 10 , '$(LOCA)','$(UNIT)', '$(IOC)', -2.8E06, 2.8E06  , DG$(CH)E , DG$(CH)P, DG$(CH)W, DG$(CH)D, 1  , OUT$(CH), '$(SYS)' }
+	  { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)F):",  2, "Channel $(CH)", 0 , 100, 10 , '$(LOCA)','$(UNIT)', '$(IOC)', -2.8E06, 2.8E06  , DG$(CH)E , DG$(CH)P, DG$(CH)W, DG$(CH)D, 1  , OUT$(CH), '$(SYS)' }
+}
+

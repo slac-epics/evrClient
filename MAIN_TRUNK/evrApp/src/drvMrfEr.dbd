@@ -1,0 +1,7 @@
+driver(drvMrf200Er)
+registrar(drvMrfErRegister)
+registrar(drvMrfRegister)
+registrar(evrEEPROMFixupRegister)
+variable(int_showme)
+variable(event_showme)
+variable(dbufst_showme)

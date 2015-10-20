@@ -1,0 +1,30 @@
+file bsaGENEdef.db
+# ==========================================================================
+# Associated Display: evnt_bsa_dev_edefs
+#
+# Set the following macros in this subsitutuion file to use the 
+# above template.
+#
+#        $(DEVICE)       device information, prefix of PV name
+#                        such as, WIRE:B34:776
+#        $(ATRB)         attibute name for the BSA PV: such as, POSN
+#
+# Optional:
+#        $(EGU)          Engineering Unit
+#        $(HOPR)         High operation range
+#        $(LOPR)         Low operation range
+#        $(PREC)         Precision
+#        $(ADEL)         Archive Deadband
+#        $(FLNK)         forward link to hook a processing chain after the BSA processing
+#                        if you don't want to use it; 
+#                        please put double quote into subsitution file
+#                        to make an empty allocation for the forward link.
+
+{
+  pattern {DEVICE, ATRB, IN, EGU, HOPR, LOPR, PREC, ADEL, FLNK}
+
+# Generic: Substitute at run time in your st.cmd
+          { '$(DEVICE)', '$(ATRB)', '$(DEVICE):$(ATRB)', '$(EGU=)', '$(HOPR=)', '$(LOPR=)', '$(PREC=3)', '$(ADEL=)', '$(FLNK=)'}
+
+}
+

@@ -1,0 +1,13 @@
+#==============================================================================
+#
+# Abs:  EVR Records with macros for extended delays
+#
+# Name: evrWithExtDelays.substitutions
+#
+#==============================================================================
+#
+file evrPmc.template 
+{
+pattern {   EVR ,  C    ,F0,F1,F2,F3,  OTP   ,  OTW   ,  OTD0  ,  OTD1  ,  OTD2  ,  OTD3  ,  OTD4  ,  OTD5  ,  OTD6  ,  OTD7  ,  OTD8  ,  OTD9  ,  OTDA  ,  OTDB  ,  OTDC  ,  OTDD  ,   DGE  ,  DGW0 ,  DGW1 ,  DGW2 ,  DGD0 ,  DGD1 ,  DGD2 ,  DGC0 ,  DGC1 ,  DGC2 ,  DGP0 ,  DGP1 ,  DGP2 }
+	{ $(DEV),$(CARD), 0, 1, 2, 3, Enabled,$(WIDTH),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(DELAY),$(STATE),$(DG0W),$(DG1W),$(DG2W),$(DG0D),$(DG1D),$(DG2D),$(DG0C),$(DG1C),$(DG2C),$(DG0P),$(DG1P),$(DG2P)}
+}

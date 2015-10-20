@@ -1,0 +1,92 @@
+#==============================================================================
+#
+# Abs:  EVR Event Records for Event Code Sequences
+#
+# Name: eventCodeSequenceAll.substitutions
+#
+#==============================================================================
+#
+
+
+
+file evrEvent.db
+{
+# Dictionary
+# -------------------------------------
+# DEV = Location
+# NAME = Name
+# ID = Event Code
+# DELY = Delay in clock ticks
+# PRIO = Priority
+# HIHI, HIGH, LOLO, LOW = Alarm limits
+# LNAME = Long name
+
+# Substitutions
+# -------------------------------------
+pattern {       DEV,   NAME, ID,  DELY, PRIO,  HIHI,  HIGH, LOLO, LOW,          LNAME }
+        { $(DEVICE), ECS_67, 67, 11967,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 67" }
+        { $(DEVICE), ECS_68, 68, 11968,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 68" }
+        { $(DEVICE), ECS_69, 69, 11969,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 69" }
+        { $(DEVICE), ECS_70, 70, 11970,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 70" }
+        { $(DEVICE), ECS_71, 71, 11971,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 71" }
+        { $(DEVICE), ECS_72, 72, 11972,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 72" }
+        { $(DEVICE), ECS_73, 73, 11973,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 73" }
+        { $(DEVICE), ECS_74, 74, 11974,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 74" }
+        { $(DEVICE), ECS_75, 75, 11975,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 75" }
+        { $(DEVICE), ECS_76, 76, 11976,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 76" }
+        { $(DEVICE), ECS_77, 77, 11977,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 77" }
+        { $(DEVICE), ECS_78, 78, 11978,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 78" }
+        { $(DEVICE), ECS_79, 79, 11979,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 79" }
+        { $(DEVICE), ECS_80, 80, 11980,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 80" }
+        { $(DEVICE), ECS_81, 81, 11981,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 81" }
+        { $(DEVICE), ECS_82, 82, 11982,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 82" }
+        { $(DEVICE), ECS_83, 83, 11983,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 83" }
+        { $(DEVICE), ECS_84, 84, 11984,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 84" }
+        { $(DEVICE), ECS_85, 85, 11985,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 85" }
+        { $(DEVICE), ECS_86, 86, 11986,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 86" }
+        { $(DEVICE), ECS_87, 87, 11987,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 87" }
+        { $(DEVICE), ECS_88, 88, 11988,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 88" }
+        { $(DEVICE), ECS_89, 89, 11989,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 89" }
+        { $(DEVICE), ECS_90, 90, 11990,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 90" }
+        { $(DEVICE), ECS_91, 91, 11991,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 91" }
+        { $(DEVICE), ECS_92, 92, 11992,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 92" }
+        { $(DEVICE), ECS_93, 93, 11993,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 93" }
+        { $(DEVICE), ECS_94, 94, 11994,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 94" }
+        { $(DEVICE), ECS_95, 95, 11995,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 95" }
+        { $(DEVICE), ECS_96, 96, 11996,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 96" }
+        { $(DEVICE), ECS_97, 97, 11997,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 97" }
+        { $(DEVICE), ECS_98, 98, 11998,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 98" }
+# Extended Event Code Sequence
+        { $(DEVICE), ECS_167, 167, 12067,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 167" }
+        { $(DEVICE), ECS_168, 168, 12068,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 168" }
+        { $(DEVICE), ECS_169, 169, 12069,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 169" }
+        { $(DEVICE), ECS_170, 170, 12070,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 170" }
+        { $(DEVICE), ECS_171, 171, 12071,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 171" }
+        { $(DEVICE), ECS_172, 172, 12072,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 172" }
+        { $(DEVICE), ECS_173, 173, 12073,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 173" }
+        { $(DEVICE), ECS_174, 174, 12074,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 174" }
+        { $(DEVICE), ECS_175, 175, 12075,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 175" }
+        { $(DEVICE), ECS_176, 176, 12076,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 176" }
+        { $(DEVICE), ECS_177, 177, 12077,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 177" }
+        { $(DEVICE), ECS_178, 178, 12078,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 178" }
+        { $(DEVICE), ECS_179, 179, 12079,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 179" }
+        { $(DEVICE), ECS_180, 180, 12080,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 180" }
+        { $(DEVICE), ECS_181, 181, 12081,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 181" }
+        { $(DEVICE), ECS_182, 182, 12082,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 182" }
+        { $(DEVICE), ECS_183, 183, 12083,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 183" }
+        { $(DEVICE), ECS_184, 184, 12084,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 184" }
+        { $(DEVICE), ECS_185, 185, 12085,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 185" }
+        { $(DEVICE), ECS_186, 186, 12086,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 186" }
+        { $(DEVICE), ECS_187, 187, 12087,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 187" }
+        { $(DEVICE), ECS_188, 188, 12088,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 188" }
+        { $(DEVICE), ECS_189, 189, 12089,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 189" }
+        { $(DEVICE), ECS_190, 190, 12090,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 190" }
+        { $(DEVICE), ECS_191, 191, 12091,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 191" }
+        { $(DEVICE), ECS_192, 192, 12092,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 192" }
+        { $(DEVICE), ECS_193, 193, 12093,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 193" }
+        { $(DEVICE), ECS_194, 194, 12094,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 194" }
+        { $(DEVICE), ECS_195, 195, 12095,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 195" }
+        { $(DEVICE), ECS_196, 196, 12096,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 196" }
+        { $(DEVICE), ECS_197, 197, 12097,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 197" }
+        { $(DEVICE), ECS_198, 198, 12098,  LOW, 360.5, 360.5,   -1,  -1, "ECS Event 198" }
+}

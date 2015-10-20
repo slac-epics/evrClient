@@ -1,0 +1,65 @@
+#==============================================================================
+#
+# Abs:  LCLS Trigger records for a generic PMC EVR in a VME crate with rear transition module
+#
+# Name: VME-TTB-200-trig.substitutions
+#
+# Associated Display: evnt_trig_VME_TTB.edl
+#
+# Rem:  Instantiate one line for every trigger channel including ones not used.
+# There should be 14 lines for a transition module.
+#
+# Macros:
+#   SYS     SYS code for the system where this EVR is deployed:
+#       SYS0 for LCLS
+#       SYS1 for FACET
+#       SYS2 for LCLS II
+#	LOCA	Location of the EVR that triggers the device.  It is the second part of the
+#		EVR:<loca>:<unit>:CTRL record instantiated with EvrPmc.db.
+#	UNIT	Unit number of the EVR instantiated in EvrPmc.db. Format is xxyy,
+#       where xx = subsystem and yy is 01, 02, etc.
+#	DEV	Leave undefined for general purpose triggers.
+#       If this is undefined, trigger PV names will start with "TRIG:<loca>:<unit>:".
+#       Define this to give trigger PVs the names "$(DEV):0" through "$(DEV):2",
+#       that is, replace "TRIG:<loca>:<unit>:" with "$(DEV):".
+#   DEVn where n is 0-13. Use these to individually set channel PV names. Give the
+#       name of the device being triggered up to and including the 3rd colon.
+#		Add a qualifying name after the 3rd colon, if necessary, to keep the name unique.
+#		If the trigger channel is not used, use "TRIG:<loca>:<unit>:"
+#		where <loca> is the location of your IOC and <unit> is xxyy, where xx = subsystem
+#		and yy is 01, 02, etc.
+#	IOC	Name of IOC that contains the EVR, not including the 3rd colon.
+#
+#---------------------------------------------------------------------------------------------
+# Mod:
+#       31-Jan-2012, T. Lahey          (LAHEY):
+#          Add EVR and FILE tags to generate event edl files
+#          & change DESC values to production event file evnt_la20_thales.edl
+#==============================================================================
+#
+file evrDevTrig.db
+{
+#EVR $(EVR)
+#FILE evnt_trig_VME
+#BODY_TEXT VME EVR with rear transition module
+#CONTROLPV1 SIOC:$(SYS):AL00:MODE
+#CONTROLPV2 SIOC:$(SYS):AL00:TOD
+#           Device	   , Description    ,polarity,width,delay,event , EVR  , EVR,  IOC
+#			                                         code   ,location,unit
+  pattern { DEV ,                                     , CH, DESC               , POL, WID, DES,  LOCA   , UNIT   , IOC   ,  DRVL  ,  DRVH , TCTL, TPOL, TWID, TDES,CTL,TOUT, SYS           }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  0,  "Spare rear Trig 1",  0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  1,  "Spare rear Trig 2",  0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  2,  "Spare rear Trig 3",  0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  3,  "Spare rear Trig 4",  0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  4,  "Spare rear Trig 5",  0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  5,  "Spare rear Trig 6",  0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  6,  "Spare rear Trig 7",  0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  7,  "Spare rear Trig 8",  0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  8,  "Spare rear Trig 9",  0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  9,  "Spare rear Trig 10", 0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTP$(CH), OT$(CH)P, OT$(CH)W, OT$(CH)D, 1, OUT$(CH), '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  10, "Spare rear Trig 11", 0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTPA, OTAP, OTAW, OTAD, 1, OUTA, '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  11, "Spare rear Trig 12", 0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTPB, OTBP, OTBW, OTBD, 1, OUTB, '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  12, "Spare rear Trig 13", 0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTPC, OTCP, OTCW, OTCD, 1, OUTC, '$(SYS)' }
+	 { "\$(DEV$(CH)=\$(DEV=TRIG:\$(LOCA):\$(UNIT)):$(CH)):",  13, "Spare rear Trig 14", 0 , 100, 10 ,  '$(LOCA)', '$(UNIT)', '$(IOC)', -2.8E06, 2.8E06, OTPD, OTDP, OTDW, OTDD, 1, OUTD, '$(SYS)' }
+}
+

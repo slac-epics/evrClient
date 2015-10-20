@@ -1,0 +1,14 @@
+-include $(TOP)/configure/CONFIG_SITE
+
+# For Build Type: x86_64-glibc-linux
+
+### NOTE: SETTABLE_CONFIG
+KERNEL_MODULE_EVRMA=/u/re/sgruden/work/cleaning/evrmaDriver
+
+### NOTE: SETTABLE_CONFIG
+EVRMA=/u/re/sgruden/work/cleaning/evrma/1.0/buildroot-2014.08-x86_64
+
+EVRMA_LIB     = $(EVRMA)/lib
+EVRMA_INCLUDE = -I$(EVRMA)/include
+KERNEL_MODULE_EVRMA_INCLUDE = -I$(KERNEL_MODULE_EVRMA)/src
+
