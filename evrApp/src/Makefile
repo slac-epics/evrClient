@@ -39,7 +39,7 @@ USR_CPPFLAGS += $(KERNEL_MODULE_EVRMA_INCLUDE)
 INC += mrfCommon.h
 INC += debugPrint.h
 INC += devMrfEr.h
-INC += drvMrfEr.h
+# # # # INC += drvMrfEr.h
 
 #-----------------------------------
 # Build the record support modules
