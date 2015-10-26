@@ -54,7 +54,7 @@
 
 #include "linux-evrma.h"
 
-#define ADBG(FORMAT, ...) printf("DBG: " FORMAT "\n", ## __VA_ARGS__)
+#define ADBG(FORMAT, ...) {printf("DBG: " FORMAT "\n", ## __VA_ARGS__); fflush(stdout);}
 #define AINFO(FORMAT, ...) printf("INFO: " FORMAT "\n", ## __VA_ARGS__)
 #define AERR(FORMAT, ...) errlogPrintf("ERROR: " FORMAT "\n", ## __VA_ARGS__)
 
@@ -503,6 +503,7 @@ epicsStatus eevrmaEventProcess (ereventRecord  *pRec)
     VevrStruct  *pCard;                       /* Pointer to Event Receiver card structure       */
   
 	int pulseCount;
+	ADBG("eevrmaEventProcess");
 	
    /*---------------------
     * Get the card structure.
@@ -540,10 +541,6 @@ epicsStatus eevrmaEventProcess (ereventRecord  *pRec)
 				evrmaSetPulseRamForEvent(pCard->session, 0x##N, \
 				pRec->enm, (pRec->out##N != 0) ? (1 << EVR_PULSE_CFG_BIT_TRIGGER) : 0); \
 			}
-
-		// TODO: at the moment it is not checked if event or the 'mask'
-		// has changed. Should work without this but of course not
-		// very effectively. 
 		
 		SET_FOR_ONE_PULSGEN(0);
 		SET_FOR_ONE_PULSGEN(1);
@@ -569,46 +566,6 @@ epicsStatus eevrmaEventProcess (ereventRecord  *pRec)
 		 }
 
     }/*end if record is enabled*/
-
-   /*---------------------
-    * If the record is disabled, clear its output mask
-    * and set the LENM field to ignore further processing.
-    * Put disabled records into a STATE_ALARM with MINOR severity.
-    */
-    else {
-
-       /*---------------------
-        * Clear the output mask if this is the first time.
-        * (Note that if we are processing because the ENAB field changed from
-        * "Enable" to "Disable", then LENM will equal ENM.)
-        */
-		//         if ((pRec->lenm < EVR_NUM_EVENTS) && (pRec->lenm > 0)) {
-		//             pCard->ErEventTab[pRec->lenm] = 0;
-		//             LoadRam = epicsTrue;
-		//         }/*end if LENM was valid*/
-
-       /*---------------------
-        * Set LENM to an invalid code in order to:
-        * a) Inhibit further processing until ENAB goes back to "Enabled", and
-        * b) Force a RAM re-load when ENAB does go back to "Enabled".
-        */
-		//         pRec->lenm = -1;
-		//         recGblSetSevr (pRec, STATE_ALARM, MINOR_ALARM);
-    }/*end if record is disabled*/
-
-   /*---------------------
-    * Re-load the Event Mapping RAM if it has changed.
-    * If the event interrupt bit is specified, make sure Event FIFO interrupts are enabled.
-    */
-	//     if (LoadRam) {
-	//         if (DebugFlag)
-	//             printf ("ErEventProc(%s) updating Event RAM\n", pRec->name);
-	// 
-	//         if (Mask & EVR_MAP_INTERRUPT)
-	//             ErEventIrq (pCard, epicsTrue);
-	// 
-	//         ErUpdateRam (pCard, pCard->ErEventTab);
-	//     }/*end if we should re-load the Event Mapping Ram*/
 
    /*---------------------
     * Unlock the Event Record card structure
@@ -711,8 +668,6 @@ epicsStatus eevrmaEpicsEventInitRec (eventRecord *pRec)
 LOCAL_RTN
 epicsStatus eevrmaEpicsEventGetIoScan (int cmd, eventRecord *pRec, IOSCANPVT *pPvt)
 {
-// // //   if (!pRec->dpvt) return (S_dev_badCard);
-// // //   *pPvt = *((IOSCANPVT*)(pRec->dpvt));
   return (0);
 
 }/*end eevrmaEpicsEventGetIoScan()*/
@@ -743,7 +698,6 @@ static ErDsetStruct devMrfErEpicsBi = {
 };
 
 epicsExportAddress (dset, devMrfErEpicsBi);
-// 
 
 LOCAL_RTN
 epicsStatus eevrmaEpicsBiInitRec (biRecord *pRec)
@@ -805,8 +759,6 @@ epicsStatus eevrmaEpicsBiProcess (biRecord  *pRec)
     */
     epicsMutexLock (pCard->cardLock);
 
-// // // //     pRec->val = ErCheckTaxi (pCard)?0:1;
-	
 	{
 		int taxiStatus;
 		uint32_t fpgaVersion;
@@ -1035,6 +987,8 @@ static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event
 				static int counterHere = 0;
 				static int showFac = 100;
 				counterHere ++;
+				
+				ADBG("Bad DBUF arrived");
 				
 				if(counterHere % showFac == 0) {
 					ADBG("%dX ERROR_DBUF_CHECKSUM", showFac);

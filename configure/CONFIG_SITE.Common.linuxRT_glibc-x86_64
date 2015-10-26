@@ -3,10 +3,12 @@
 # For Build Type: x86_64-glibc-linux
 
 ### NOTE: SETTABLE_CONFIG
-KERNEL_MODULE_EVRMA=/u/re/sgruden/work/cleaning/evrmaDriver/master
+#KERNEL_MODULE_EVRMA=/u/re/sgruden/work/cleaning/evrmaDriver/master
+KERNEL_MODULE_EVRMA ?= /afs/slac/g/lcls/package/linuxKernel_Modules/evrmaDriver/master
 
 ### NOTE: SETTABLE_CONFIG
-EVRMA=/u/re/sgruden/work/cleaning/evrma/master/buildroot-2014.08-glibc-x86_64
+#EVRMA=/u/re/sgruden/work/cleaning/evrma/master/buildroot-2014.08-glibc-x86_64
+EVRMA=/afs/slac/g/lcls/package/evrma/master/buildroot-2014.08-glibc-x86_64
 
 EVRMA_LIB     = $(EVRMA)/lib
 EVRMA_INCLUDE = -I$(EVRMA)/include
