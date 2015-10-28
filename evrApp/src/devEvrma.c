@@ -977,18 +977,18 @@ static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event
 			uint32_t *dataDBuf;
 			int dbufLength;
 
-			int checksumOk = evrmaGetDBuf(session, &dataDBuf, &dbufLength) == 0;
+			int dbufStatus = evrmaGetDBuf(session, &dataDBuf, &dbufLength);
 			
-			if(dbufst_showme>0) { dbufst_showme--; printf("DBUF checksum ok: %d, size: %d\n", checksumOk, dbufLength); }
+			if(dbufst_showme>0) { dbufst_showme--; printf("DBUF status: %d, size: %d\n", dbufStatus, dbufLength); }
 			
 			vevr->DBuffError = epicsFalse;
-            if(!checksumOk) {
+            if(dbufStatus < 0) {
 
 				static int counterHere = 0;
 				static int showFac = 100;
 				counterHere ++;
 				
-				ADBG("Bad DBUF arrived");
+				ADBG("Bad DBUF arrived: %d", dbufStatus);
 				
 				if(counterHere % showFac == 0) {
 					ADBG("%dX ERROR_DBUF_CHECKSUM", showFac);
