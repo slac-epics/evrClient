@@ -58,6 +58,10 @@
 #define AINFO(FORMAT, ...) printf("INFO: " FORMAT "\n", ## __VA_ARGS__)
 #define AERR(FORMAT, ...) errlogPrintf("ERROR: " FORMAT "\n", ## __VA_ARGS__)
 
+#ifdef DBG_MEASURE_TIME_FROM_IRQ_TO_USER
+#include "libevrma_dbg.h"
+#endif
+
 epicsInt32 eevrmaDebug = 0;
 
 // needed in erapi.c, for whatever reason
@@ -503,7 +507,7 @@ epicsStatus eevrmaEventProcess (ereventRecord  *pRec)
     VevrStruct  *pCard;                       /* Pointer to Event Receiver card structure       */
   
 	int pulseCount;
-	ADBG("eevrmaEventProcess");
+// 	ADBG("eevrmaEventProcess");
 	
    /*---------------------
     * Get the card structure.
@@ -558,10 +562,10 @@ epicsStatus eevrmaEventProcess (ereventRecord  *pRec)
 		SET_FOR_ONE_PULSGEN(d);
 		
 		 if (pRec->vme  != 0) {
-			 ADBG("evrmaSubscribe %d", pRec->enm);
+// 			 ADBG("evrmaSubscribe %d", pRec->enm);
 			 evrmaSubscribe(pCard->session, pRec->enm);
 		 } else {
-			 ADBG("evrmaUnsubscribe %d", pRec->enm);
+// 			 ADBG("evrmaUnsubscribe %d", pRec->enm);
 			 evrmaUnsubscribe(pCard->session, pRec->enm);
 		 }
 
@@ -795,7 +799,7 @@ epicsStatus ErRegisterEventHandler (int card, USER_EVENT_FUNC eventFunc)
 {
     VevrStruct  *vevr;
 
-    if (eevrmaDebug){
+	if (eevrmaDebug){
         printf ("ErRegisterEventHandler(%d, %p)\n", card, (void *)eventFunc);
     }
 
@@ -945,16 +949,44 @@ epicsStatus ErGetTicks(int Card, epicsUInt32 *Ticks)
 		return ERROR;
 
 	if(evrmaGetTimestampLatch(pCard->session, Ticks) < 0) return ERROR;
-	
+
 	return OK;
 }
+
+#ifdef DBG_MEASURE_TIME_FROM_IRQ_TO_USER
+
+static uint32_t dbg_get_time(EvrmaSession session)
+{
+	uint32_t val;
+	
+	if(evrmaGetTimestampLatch(session, &val) < 0) return 0;
+	return val;
+}
+
+// #define OPTIMIZE_EPICS_CALLBACK_TIME
+// #define DONT_CALL_EPICS_CALLBACKS
+
+#endif
+
 
 static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event, 
 							   uint8_t *dataEvent, int dataLength)
 {
 	struct VevrStruct *vevr = (struct VevrStruct *)handlerArg;
+	
+#ifdef DBG_MEASURE_TIME_FROM_IRQ_TO_USER
+	uint32_t start_meas = 0, end_meas = 0;
+	int doTimeDebug = 0;
+	
+	start_meas = dbg_get_time(session);
 
+#endif
+
+
+#ifdef OPTIMIZE_EPICS_CALLBACK_TIME
+#else
 	epicsMutexLock(vevr->cardLock);
+#endif
 	
 	/* vevr->IrqLevel not used. Why would it be? */
 	
@@ -962,11 +994,22 @@ static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event
 	
 	if(event >= EVRMA_FIFO_MIN_EVENT_CODE && event <= EVRMA_FIFO_MAX_EVENT_CODE) {
 		
+#ifdef DBG_MEASURE_TIME_FROM_IRQ_TO_USER
+		doTimeDebug = 1;
+#endif
+		
 		struct evr_data_fifo_event *evData = (struct evr_data_fifo_event *)dataEvent;
 		
 		if(event_showme>0) { event_showme--; printf("FIFOEvent: %d\n", event); }
 		if (vevr->devEventFunc != NULL) {
+			
+#ifdef DONT_CALL_EPICS_CALLBACKS
+#else
+// start_meas = dbg_get_time();
 			(*vevr->devEventFunc)(vevr, event, evData->timestamp);
+// end_meas = dbg_get_time();
+#endif
+			
 		}
 		
 	} else {
@@ -988,23 +1031,27 @@ static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event
 				static int showFac = 100;
 				counterHere ++;
 				
-				ADBG("Bad DBUF arrived: %d", dbufStatus);
-				
 				if(counterHere % showFac == 0) {
-					ADBG("%dX ERROR_DBUF_CHECKSUM", showFac);
-					if(showFac < 1000000)
+					ADBG("%dX bad dbufStatus (last=%d)", showFac, dbufStatus);
+					if(showFac < 100000)
 						showFac *= 2;
 				}
 				
 				vevr->DBuffError = epicsTrue;
                 if (vevr->devErrorFunc != NULL) {
+#ifdef DONT_CALL_EPICS_CALLBACKS
+#else
                     (*vevr->devErrorFunc)(vevr, ERROR_DBUF_CHECKSUM);
+#endif
                 }
             } else {
 				if (vevr->devDBuffFunc != NULL) {
 					if(dbufst_showme>0) printf("DBUF size:  %d bytes,  %d u32\n", dbufLength, dbufLength>>2); 
 					if(dbufst_showme>0) printf("DBUF header (type/version): %8.8x\n", dataDBuf[0]);
+#ifdef DONT_CALL_EPICS_CALLBACKS
+#else
 					(*vevr->devDBuffFunc)(vevr, dbufLength, dataDBuf);
+#endif
 				}
 			}
 
@@ -1015,34 +1062,57 @@ static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event
             vevr->rxvioCount++;
 			ADBG("TAXI err");
             if (vevr->devErrorFunc != NULL) {
+#ifdef DONT_CALL_EPICS_CALLBACKS
+#else
                 (*vevr->devErrorFunc)(vevr, ERROR_TAXI);
+#endif
             }
 			break;
 			
 		case EVRMA_EVENT_ERROR_LOST:
 			ADBG("LOST err");
 			if (vevr->devErrorFunc != NULL) {
+#ifdef DONT_CALL_EPICS_CALLBACKS
+#else
                 (*vevr->devErrorFunc)(vevr, ERROR_LOST);
+#endif
             }
 			break;
 			
 		case EVRMA_EVENT_ERROR_HEART:
 			ADBG("HEART err");
             if (vevr->devErrorFunc != NULL) {
+#ifdef DONT_CALL_EPICS_CALLBACKS
+#else
                 (*vevr->devErrorFunc)(vevr, ERROR_HEART);
+#endif
             }
 			break;
 			
 		case EVRMA_EVENT_DELAYED_IRQ:
             if (vevr->devEventFunc != NULL) {
+#ifdef DONT_CALL_EPICS_CALLBACKS
+#else
                 (*vevr->devEventFunc)(vevr, EVENT_DELAYED_IRQ, 0);
+#endif
             }
 			break;
 		}
 		
 	}
+
 		
+#ifdef OPTIMIZE_EPICS_CALLBACK_TIME
+#else
 	epicsMutexUnlock(vevr->cardLock);
+#endif
+	
+#ifdef DBG_MEASURE_TIME_FROM_IRQ_TO_USER
+	end_meas = dbg_get_time(session);
+	
+	if(doTimeDebug)
+		evrmaTimeDebug(event, dataEvent, 150, start_meas, end_meas);
+#endif
 }
 
 static int eevrmaConfigure (
