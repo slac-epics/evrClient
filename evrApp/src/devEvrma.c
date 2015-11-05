@@ -986,6 +986,9 @@ static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event
 		switch(event) {
 		case EVRMA_EVENT_DBUF_DATA:
 		{
+#ifdef DBG_MEASURE_TIME_FROM_IRQ_TO_USER
+			doTimeDebug = 1;
+#endif
 			uint32_t *dataDBuf;
 			int dbufLength;
 
