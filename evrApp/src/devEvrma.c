@@ -354,20 +354,6 @@ epicsStatus eevrmaProcess (erRecord  *pRec)
     * Lock the card structure while we are processing the record.
     */
     epicsMutexLock (pCard->cardLock);
-
-   /*---------------------
-    * Ignore trigger event output enables pRec->trgX
-    * Ignore the distributed bus (OTxB) enables pRec->otXb
-    * Ignore the level output (OTL) enables pRec->otlX
-    * Ignore the front panel output configuration pRec->fpsX
-    */
-
-   /*---------------------
-    * Set the event clock prescaler. TODO?
-    */
-#define eevrmaSetTickPre(a, b) //ADBG("->->->->->->->->->->->->->->->->->eevrmaSetTickPre")
-
-    eevrmaSetTickPre (pCard, pRec->pres);
     
    	pulseCount = evrmaGetPulseCount(pCard->session);
 	
@@ -396,14 +382,6 @@ epicsStatus eevrmaProcess (erRecord  *pRec)
     if(pulseCount > 15) eevrmaSetPulseGen (pCard, 15, pRec->otpb, pRec->otbd, pRec->otbw, 1, pRec->otbp);
     if(pulseCount > 16) eevrmaSetPulseGen (pCard, 16, pRec->otpc, pRec->otcd, pRec->otcw, 1, pRec->otcp);
     if(pulseCount > 17) eevrmaSetPulseGen (pCard, 17, pRec->otpd, pRec->otdd, pRec->otdw, 1, pRec->otdp);   
-
-   /*---------------------
-    * Set the delayed interrupt parameters (Enable, Delay, Prescaler)
-	* TODO?
-    */
-#define eevrmaSetDirq(a, b, c, d) //ADBG("->->->->->->->->->->->->->->->->->eevrmaSetDirq")
-
-    eevrmaSetDirq (pCard, pRec->dvme, pRec->dvmd, pRec->dvmc);
 
    /*---------------------
     * Enable or Disable Receive Link Frame Error Interrupts
@@ -562,10 +540,8 @@ epicsStatus eevrmaEventProcess (ereventRecord  *pRec)
 		SET_FOR_ONE_PULSGEN(d);
 		
 		 if (pRec->vme  != 0) {
-// 			 ADBG("evrmaSubscribe %d", pRec->enm);
 			 evrmaSubscribe(pCard->session, pRec->enm);
 		 } else {
-// 			 ADBG("evrmaUnsubscribe %d", pRec->enm);
 			 evrmaUnsubscribe(pCard->session, pRec->enm);
 		 }
 
@@ -786,7 +762,7 @@ epicsStatus eevrmaEpicsBiProcess (biRecord  *pRec)
 
 
 
-/**
+/*
  *
  * Register a listener for the event system.  Every time we get an event from
  * the event receiver, we will call the registered listener and pass in the
@@ -812,7 +788,7 @@ epicsStatus ErRegisterEventHandler (int card, USER_EVENT_FUNC eventFunc)
     return (0);
 }
 
-/**
+/*
  *
  * Register an error handler for the event system. 
  * Every time we get an error (rxvio, etc.) from
@@ -911,9 +887,6 @@ epicsStatus eevrmaDrvReport (int level)
 
 epicsStatus eevrmaDrvInit (void)
 {
-	// TODO: Is this comment important?:
-	//		epicsAtExit (&ErShutdownFunc, NULL);
-
 	return OK;
 }
 
@@ -987,9 +960,7 @@ static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event
 #else
 	epicsMutexLock(vevr->cardLock);
 #endif
-	
-	/* vevr->IrqLevel not used. Why would it be? */
-	
+
 	if(int_showme>0) { int_showme--; printf("event: %d\n", event); }
 	
 	if(event >= EVRMA_FIFO_MIN_EVENT_CODE && event <= EVRMA_FIFO_MAX_EVENT_CODE) {
@@ -1005,9 +976,7 @@ static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event
 			
 #ifdef DONT_CALL_EPICS_CALLBACKS
 #else
-// start_meas = dbg_get_time();
 			(*vevr->devEventFunc)(vevr, event, evData->timestamp);
-// end_meas = dbg_get_time();
 #endif
 			
 		}
@@ -1138,10 +1107,6 @@ static int eevrmaConfigure (
             return ERROR;
         }
     }
-    
-	/* That's all we need about opening. */
-	/* No need for firmware version checking. */
-	/* No need for FormFactor checking. */
 
     /* Fill in the minimum of the driver structure for driver data structures management */
     vevr = (struct VevrStruct *) malloc(sizeof(struct VevrStruct));
@@ -1170,15 +1135,6 @@ LFreeAndError:
      again if called with the same card number: we can release the mutex */
     epicsMutexUnlock(eevrmaConfigureLock);
 	
-
-    /* TODO: Is this comment important?
-	 * 
-	 * Finish filling the driver structure and configuring the hardware,
-	 * if this fails we cannot release the linked list link, instead we
-	 * we set Cardno to an invalid value
-     */
-	
-	
 	
     epicsMutexLock(vevr->cardLock);
 
@@ -1198,18 +1154,7 @@ LFreeAndError:
 	
 	// TODO: Who calls the evrmaCloseSession() ?
 
-	/* Not setting the clock divider. Evr managers' job. */
-	/* Not disabling the IRQs, they are disabled on start anyway before the subscriptions */
-	/* Not assigning the irq handler. This was done on evrmaOpenSession */
-	/* pCard->IrqLevel not used. Why would it be? */
-
     epicsMutexUnlock(vevr->cardLock);
-	
-	/* TODO: make an ErResetAll equivalent but only reset the VEVR stuff, not general */
-	
-    /* Backwards compatibility: old firmware had optical signal always
-     * looped back to the TX; this must be enabled in the evr manager.
-     */
 
 	return OK;
 }
