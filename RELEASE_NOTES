@@ -1,6 +1,11 @@
 Release Notes for the event package
 -----------------------------------
 
+evrma-master: 2015-11-05 S. Gruden
+      * Replaced with the support for the EVRMA system (note that the
+        evrSupport directory functionality remains the same as was in the
+        'event' module).
+
 event-R4-2-0: 2015-08-18 K. Kim
       * Include Tomo's EMCOR EVR support
       * add up debugging feature for interrupt, mapping ram, event FIFO and data buffer handling

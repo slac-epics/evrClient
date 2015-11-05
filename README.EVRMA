@@ -1,3 +1,6 @@
+Building
+=========
+
 The following variables should be changed to match your system configuration:
 
 - KERNEL_MODULE_EVRMA in configure/CONFIG_SITE.Common.xxxx should point
@@ -5,3 +8,22 @@ The following variables should be changed to match your system configuration:
   
 - EVRMA in configure/CONFIG_SITE.Common.xxxx should point to the installed evrma
   library.
+  
+  
+  
+  
+
+Using in IOCs
+==============
+
+Add eevrmaConfigure for each VEVR before iocInit.
+
+    eevrmaConfigure <instance> <vevrDevName>
+
+where:
+
+- instance = EVR instance, starting from 0, incrementing by 1 for each 
+  subsequent card.
+  
+- vevrDevName = name of the VEVR Linux device (e.g. /dev/vevr0, ...)
+
