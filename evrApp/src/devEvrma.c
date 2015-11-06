@@ -511,13 +511,13 @@ epicsStatus eevrmaEventProcess (ereventRecord  *pRec)
     */
     epicsMutexLock (pCard->cardLock);
 
+	pulseCount = evrmaGetPulseCount(pCard->session);
+		
    /*---------------------
     * If the record is enabled, see if the event number or output mask have changed.
     */
     if (pRec->enab) {
 
-		pulseCount = evrmaGetPulseCount(pCard->session);
-		
 		#define SET_FOR_ONE_PULSGEN(N) \
 			if(pulseCount > 0x##N) { \
 				evrmaSetPulseRamForEvent(pCard->session, 0x##N, \
@@ -545,6 +545,33 @@ epicsStatus eevrmaEventProcess (ereventRecord  *pRec)
 			 evrmaUnsubscribe(pCard->session, pRec->enm);
 		 }
 
+	} else {
+		
+		/* The record is disabled, disable interrupt and triggers for the event */
+		
+		#define CLEAR_FOR_ONE_PULSGEN(N) \
+			if(pulseCount > 0x##N) { \
+				evrmaSetPulseRamForEvent(pCard->session, 0x##N, \
+				pRec->enm, 0); \
+			}
+		
+		CLEAR_FOR_ONE_PULSGEN(0);
+		CLEAR_FOR_ONE_PULSGEN(1);
+		CLEAR_FOR_ONE_PULSGEN(2);
+		CLEAR_FOR_ONE_PULSGEN(3);
+		CLEAR_FOR_ONE_PULSGEN(4);
+		CLEAR_FOR_ONE_PULSGEN(5);
+		CLEAR_FOR_ONE_PULSGEN(6);
+		CLEAR_FOR_ONE_PULSGEN(7);
+		CLEAR_FOR_ONE_PULSGEN(8);
+		CLEAR_FOR_ONE_PULSGEN(9);
+		CLEAR_FOR_ONE_PULSGEN(a);
+		CLEAR_FOR_ONE_PULSGEN(b);
+		CLEAR_FOR_ONE_PULSGEN(c);
+		CLEAR_FOR_ONE_PULSGEN(d);
+		
+		evrmaUnsubscribe(pCard->session, pRec->enm);
+		
     }/*end if record is enabled*/
 
    /*---------------------
