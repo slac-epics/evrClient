@@ -1,10 +1,21 @@
-Release Notes for the event package
------------------------------------
+Release Notes for the evrClient and event package
+--------------------------------------------------
 
-evrma-master: 2015-11-05 S. Gruden
-      * Replaced with the support for the EVRMA system (note that the
-        evrSupport directory functionality remains the same as was in the
-        'event' module).
+evrClient-R1-0-p2: 2015-11-09 S. Gruden
+	* updated RELEASE_NOTES
+
+evrClient-R1-0-p1: 2015-11-05 S. Gruden
+	* bug fix: support the case when the event record is disabled (disable all
+	  triggers and the interrupt).
+
+evrClient-R1-0: 2015-11-05 S. Gruden
+	* Replaced the 'event' package with the support for the EVRMA system
+	  (note that the evrSupport directory functionality remains the same as
+	  was in the 'event' module).
+
+
+---- package change: event -> evrClient ------
+
 
 event-R4-2-0: 2015-08-18 K. Kim
       * Include Tomo's EMCOR EVR support
