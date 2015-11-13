@@ -1,6 +1,9 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
 
+evrClient-R1-0-p3: 2015-11-13 S. Gruden
+	* path changes only
+
 evrClient-R1-0-p2: 2015-11-09 S. Gruden
 	* updated RELEASE_NOTES
 
