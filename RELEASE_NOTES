@@ -1,6 +1,10 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
 
+evrClient-R1-0-p4: 2015-11-18 S. Gruden
+	* Prototype of 'ErGetTicks' moved to devMrfEr.h
+	* path changes
+
 evrClient-R1-0-p3: 2015-11-13 S. Gruden
 	* path changes only
 
