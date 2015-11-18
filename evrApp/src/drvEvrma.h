@@ -78,13 +78,6 @@ void              eevrmaRegisterDevDBuffHandler (VevrStruct*, DEV_DBUFF_FUNC);
  */
 void              eevrmaSubscribeDBuff (VevrStruct*, epicsBoolean);
 
-/* This function does not reference the VevrStruct but the card num.
- * Therefore it should have been in  devMrfEr.h from the very start.
- * Therefore, not renaming to evrmaXxxx.
- * It is needed (called from the evrSupport).
- */
-epicsStatus    ErGetTicks (int, epicsUInt32*);
-
 
 #endif /* DRV_EVRMA_H */
 

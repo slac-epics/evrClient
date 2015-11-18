@@ -75,4 +75,7 @@ typedef void (*USER_DBUFF_FUNC) (void *Buffer);
 epicsStatus ErRegisterEventHandler (int Card, USER_EVENT_FUNC func);
 epicsStatus ErRegisterErrorHandler (int Card, USER_ERROR_FUNC func);
 
+epicsStatus    ErGetTicks (int Card, epicsUInt32* Ticks);
+
+
 #endif

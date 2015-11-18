@@ -842,6 +842,27 @@ epicsStatus ErRegisterErrorHandler (int Card, USER_ERROR_FUNC ErrorFunc)
     return(0);
 }
 
+/*
+ * This function was taken from the old 'event' module where the implementation
+ * didn't use any mutexes to protect the pCard->pEr value (the mutex protection
+ * lines were commented out). Therefore, this implementation also does not
+ * provide any mutex protection and the caller must be carefull to call it
+ * in a protected context.
+ */
+epicsStatus ErGetTicks(int Card, epicsUInt32 *Ticks)
+{
+	struct MrfErRegs *pEr;
+	VevrStruct *pCard = eevrmaGetVevrStruct(Card);
+
+	if(pCard == NULL)
+		return ERROR;
+
+	if(evrmaGetTimestampLatch(pCard->session, Ticks) < 0) return ERROR;
+
+	return OK;
+}
+
+
 LOCAL
 registryFunctionRef devMrfErRef [] = {
     {"ErRegisterEventHandler", (REGISTRYFUNCTION)ErRegisterEventHandler},
@@ -938,20 +959,6 @@ epicsUInt32 eevrmaGetSecondsSR (VevrStruct *pCard)
 
 }/*end eevrmaGetSecondsSR()*/
 
-
-
-epicsStatus ErGetTicks(int Card, epicsUInt32 *Ticks)
-{
-	struct MrfErRegs *pEr;
-	VevrStruct *pCard = eevrmaGetVevrStruct(Card);
-
-	if(pCard == NULL)
-		return ERROR;
-
-	if(evrmaGetTimestampLatch(pCard->session, Ticks) < 0) return ERROR;
-
-	return OK;
-}
 
 #ifdef DBG_MEASURE_TIME_FROM_IRQ_TO_USER
 
