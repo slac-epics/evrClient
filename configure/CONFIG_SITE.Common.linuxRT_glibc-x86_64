@@ -6,7 +6,12 @@
 KERNEL_MODULE_EVRMA ?= /afs/slac/g/lcls/package/linuxKernel_Modules/evrmaDriver/evrmaDriver-R1-0-p4
 
 ### NOTE: SETTABLE_CONFIG
-EVRMA=/afs/slac/g/lcls/package/evrma/evrma-R1-0-p4/buildroot-2014.08-glibc-x86_64
+PACKAGE_AREA=/afs/slac/g/lcls/package
+EVRMA_PACKAGE_NAME=evrma
+EVRMA_VERSION=evrma-R1-0-p4
+EVRMA_ARCH=$(LINUXRT_BUILDROOT_VERSION)-x86_64
+
+EVRMA=$(PACKAGE_AREA)/$(EVRMA_PACKAGE_NAME)/$(EVRMA_VERSION)/$(EVRMA_ARCH)
 
 EVRMA_LIB     = $(EVRMA)/lib
 EVRMA_INCLUDE = -I$(EVRMA)/include
