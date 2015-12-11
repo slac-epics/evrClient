@@ -1,0 +1,15 @@
+RELEASE_SITE
+O.RTEMS-beatnik/
+O.RTEMS-mvme3100/
+O.RTEMS-uC5282/
+O.linux-x86/
+O.linux-x86_64/
+O.linuxRT-x86/
+O.linuxRT-x86_64/
+O.linuxRT_glibc-x86_64/
+O.vxWorks-mpc8540/
+O.vxWorks-ppc604_altivec/
+O.vxWorks-ppc604_long/
+O.linuxRT-x6/
+O.Common/
+O.linuxRT_glibc-i686/
