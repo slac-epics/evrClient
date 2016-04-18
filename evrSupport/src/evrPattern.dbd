@@ -1,5 +1,6 @@
 function(evrPatternProcInit)
 function(evrPatternProc)
 function(evrPatternState)
+function(evrTemperatureState)
 function(evrPatternSim)
 function(evrPatternSimTest)
