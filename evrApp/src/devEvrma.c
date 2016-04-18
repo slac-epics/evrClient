@@ -882,7 +882,7 @@ epicsStatus ErGetMaxTemperature(int Card, epicsUInt32 *rawTemp, epicsFloat32 *Te
 
 	if(pCard == NULL);
 
-	if(evrmaGetTemperature(pCard->session, rawTemp) < 0) return ERROR;
+	if(evrmaGetMaxTemperature(pCard->session, rawTemp) < 0) return ERROR;
 
 
 	*Temp = ((epicsFloat32)(*rawTemp) * 503.975)/4096. - 273.15;
