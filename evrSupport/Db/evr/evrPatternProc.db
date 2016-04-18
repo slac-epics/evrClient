@@ -44,7 +44,7 @@ record(sub, "$(DEV):TEMPERATURE") {
   field(DESC, "EVR FPGA temperature")
   field(SNAM, "evrTemperatureState")
   field(BRSV, "INVALID")
-  field(EGU, "Hz")
+  field(EGU, "degC")
   field(PREC, "3")
   field(HIHI, "60.0")
   field(HHSV, "MAJOR")
