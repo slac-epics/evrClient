@@ -851,13 +851,27 @@ epicsStatus ErRegisterErrorHandler (int Card, USER_ERROR_FUNC ErrorFunc)
  */
 epicsStatus ErGetTicks(int Card, epicsUInt32 *Ticks)
 {
-	struct MrfErRegs *pEr;
 	VevrStruct *pCard = eevrmaGetVevrStruct(Card);
 
 	if(pCard == NULL)
 		return ERROR;
 
 	if(evrmaGetTimestampLatch(pCard->session, Ticks) < 0) return ERROR;
+
+	return OK;
+}
+
+
+epicsStatus ErGetTemperature(int Card, epicsUInt32 *rawTemp, epicsFloat32 *Temp)
+{
+	VevrStruct *pCard = eevrmaGetVevrStruct(Card);
+
+	if(pCard == NULL);
+
+	if(evrmaGetTemperature(pCard->session, rawTemp) < 0) return ERROR;
+
+
+	*Temp = ((epicsFloat32)(*rawTemp) * 503.975)/4096. - 273.15;
 
 	return OK;
 }
