@@ -453,18 +453,23 @@ static long evrPatternState(longSubRecord *psub)
  * Output
  * ------
  *  A   - EVR temperature reading raw value (0x000 - 0xfff), SLAC EVR only / for non SLAC EVR, the reading always 0x000
+ *  B   - raw reading for max temperature (0x000 - 0xfff), SLAC EVR only / for non SLAC EVR, the reading always 0x000 
+ *  C   - max temperature in degC, SLAC EVR only / for non SLAC EVR, the reading always -273.15 degC (absolute 0 degree)
  *  VAL - EVR temperature in degC, SLAC EVR only / for non SLAC EVR, the reading always -273.15 degC (absolute 0 degree)
  * 
  */
 
 static long evrTemperatureState(subRecord *psub)
 {
-    epicsUInt32   rawTemp;
-    epicsFloat32  Temp;
+    epicsUInt32   rawTemp, rawMaxTemp;
+    epicsFloat32  Temp,    MaxTemp;
 
     ErGetTemperature(0, &rawTemp, &Temp);
+    ErGetMaxTemperature(0, &rawMaxTemp, &MaxTemp);
 
-    psub->a = rawTemp;
+    psub->a   = rawTemp;
+    psub->b   = rawMaxTemp;
+    psub->c   = MaxTemp;
     psub->val = Temp;
 
     return OK;
