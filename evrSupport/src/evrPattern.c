@@ -48,7 +48,9 @@
 #include "registryFunction.h" /* for epicsExport           */
 #include "epicsExport.h"      /* for epicsRegisterFunction */
 #include "longSubRecord.h"    /* for struct longSubRecord  */
+#include <subRecord.h>
 
+#include "devMrfEr.h"
 #include "evrMessage.h"       /* for EVR_MESSAGE_PATTERN*  */
 #include "evrTime.h"          /* evrTime* prototypes       */
 #include "evrPattern.h"       /* for PATTERN* defines      */
@@ -446,6 +448,27 @@ static long evrPatternState(longSubRecord *psub)
   }
   return 0;
 }
+
+/*
+ * Output
+ * ------
+ *  A   - EVR temperature reading raw value (0x000 - 0xfff), SLAC EVR only / for non SLAC EVR, the reading always 0x000
+ *  VAL - EVR temperature in degC, SLAC EVR only / for non SLAC EVR, the reading always -273.15 degC (absolute 0 degree)
+ * 
+ */
+
+static long evrTemperatureState(subRecord *psub)
+{
+    epicsUInt32   rawTemp;
+    epicsFloat32  Temp;
+
+    ErGetTemperature(0, &rawTemp, &Temp);
+
+    psub->a = rawTemp;
+    psub->val = Temp;
+
+    return OK;
+}
 
 /*=============================================================================
 
@@ -617,5 +640,6 @@ return 0;
 epicsRegisterFunction(evrPatternProcInit);
 epicsRegisterFunction(evrPatternProc);
 epicsRegisterFunction(evrPatternState);
+epicsRegisterFunction(evrTemperatureState);
 epicsRegisterFunction(evrPatternSim);
 epicsRegisterFunction(evrPatternSimTest);
