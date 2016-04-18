@@ -76,6 +76,7 @@ epicsStatus ErRegisterEventHandler (int Card, USER_EVENT_FUNC func);
 epicsStatus ErRegisterErrorHandler (int Card, USER_ERROR_FUNC func);
 
 epicsStatus    ErGetTicks (int Card, epicsUInt32* Ticks);
+epicsStatus    ErGetTemperature (int Card, epicsUInt32 *rawTemp, epicsFloat32 *Temp);
 
 
 #endif
