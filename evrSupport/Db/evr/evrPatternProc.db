@@ -37,6 +37,18 @@ record(sub, "$(DEV):FIDUCIALRATE") {
   field(LOLO, "359.5")
   field(LLSV, "MAJOR")
   field(HOPR, "360")
+  field(FLNK, "$(DEV):TEMPERATURE")
+}
+
+record(sub, "$(DEV):TEMPERATURE") {
+  field(DESC, "EVR FPGA temperature")
+  field(SNAM, "evrTemperatureState")
+  field(BRSV, "INVALID")
+  field(EGU, "Hz")
+  field(PREC, "3")
+  field(HIHI, "60.0")
+  field(HHSV, "MAJOR")
+  field(HIGH, "55.0")
 }
 
 record(erevent, "$(DEV):FIDUCIALCTRL") {
