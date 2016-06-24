@@ -46,6 +46,7 @@
 
 #include "devMrfEr.h"		/* for ErRegisterEventHandler    */
 
+#include "HiResTimeStub.h"
 #ifdef __rtems__
 #define EVR_TIMEOUT     (0.06)  /* Timeout in sec waiting for 360hz input. */
 #else
@@ -72,6 +73,8 @@ static epicsEventId     evrTaskEventSem   = NULL;  /* evr task semaphore  */
 static epicsEventId     evrRecordEventSem = NULL;  /* evr record task sem */
 static int readyForFiducial = 1;        /* evrTask ready for new fiducial */
 static int evrInitialized = 0;          /* evrInitialize performed        */
+int lastfid = -1;                       /* Last fiducial seen             */
+unsigned long long evrFiducialTsc = 0L;
 
 /* Fiducial User Function List */
 typedef struct {
@@ -87,6 +90,7 @@ typedef struct {
 
 ELLLIST evrFiducialFuncList_s;
 static epicsMutexId evrRWMutex_ps = 0; 
+
 
 /*=============================================================================
 
@@ -140,6 +144,36 @@ static int evrReport( int interest )
   }
   return interest;
 }
+
+
+/*=============================================================================
+
+  Name:	evrGetFiducialTsc
+
+  Abs:	Provides access to the 64 bit cpu TimeStampCounter from the
+  		last fiducial event
+
+=============================================================================*/
+unsigned long long evrGetFiducialTsc()
+{
+	return evrFiducialTsc;
+}
+/* Add to registry so function can be called w/o adding EVENT module dependency */
+epicsRegisterFunction(evrGetFiducialTsc);
+
+/*=============================================================================
+  Name: evrGetLastFiducial()
+
+  Abs: A simple routine to return the fiducial id for the most
+  	   recently received EVENT_FIDUCIAL.
+=============================================================================*/
+int evrGetLastFiducial( )
+{
+	return lastfid;
+}
+/* Add to registry so function can be called w/o adding EVENT module dependency */
+epicsRegisterFunction(evrGetLastFiducial);
+
 
 /*=============================================================================
  
@@ -153,21 +187,21 @@ static int evrReport( int interest )
        too long processing each interrupt.
        
 =============================================================================*/
-void evrSend(void *pCard, epicsInt16 messageSize, void *message)
+void evrSend(void *pVoidCard, epicsInt16 messageSize, void *message)
 {
+#ifdef USE_EVRMA
+	VevrStruct    *pCard  = (VevrStruct *) pVoidCard;
+#else
+	ErCardStruct  *pCard  = (ErCardStruct *) pVoidCard;
+#endif
+
   epicsUInt32 evrClockCounter;
   unsigned int messageType = ((evrMessageHeader_ts *)message)->type;
 
   ErGetTicks(0, &evrClockCounter);
 
   /* Look for error from the driver or the wrong message size */
-  if ((pCard && ((
-#ifdef USE_EVRMA
-			VevrStruct
-#else
-			ErCardStruct 
-#endif
-					*)pCard)->DBuffError) ||
+  if ((pCard && pCard->DBuffError) ||
       (messageSize != sizeof(evrMessagePattern_ts))) {
     evrMessageCheckSumError(EVR_MESSAGE_PATTERN);
   } else {
@@ -194,7 +228,9 @@ void evrEvent(int cardNo, epicsInt16 eventNum, epicsUInt32 timeNum)
 
   evrTimeCount((unsigned int)eventNum);
 
-  if (eventNum == EVENT_FIDUCIAL) { 
+  if (eventNum == EVENT_FIDUCIAL) {
+  	evrFiducialTsc = GetHiResTicks();
+    lastfid = timeNum;
     if (readyForFiducial) {
       readyForFiducial = 0;
       ErGetTicks(0, &evrClockCounter);
@@ -210,9 +246,9 @@ void evrEvent(int cardNo, epicsInt16 eventNum, epicsUInt32 timeNum)
 	   */
 
 	  eventMessage.eventNum  = eventNum;
-	  epicsMessageQueueSend(eventTaskQueue, &eventMessage, sizeof(eventMessage));
+	  epicsMessageQueueSend( eventTaskQueue, &eventMessage, sizeof(eventMessage) );
   }
-
+ 
 }
 
 /*=============================================================================
@@ -354,6 +390,7 @@ int evrInitialize()
     return -1;
   }
   evrInitialized = -1;
+
 
 #if defined(_X86_) || defined(_X86_64_)
   Get_evrTicksPerUsec_for_X86(); 

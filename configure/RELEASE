@@ -28,7 +28,7 @@ BASE_MODULE_VERSION=$(EPICS_BASE_VER)
 # IOC apps or other Support apps
 # =============================================================
 #GENERALTIME_MODULE_VERSION=generalTime-R2-2-1
-MISCUTILS_MODULE_VERSION=miscUtils-R2-2-2
+MISCUTILS_MODULE_VERSION=miscUtils-R2-2-3
 
 # ============================================================
 # External Support

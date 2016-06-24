@@ -1,6 +1,12 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
 
+evrClient-R1-0-p7: 2016-06-23 B. Hill
+	* Updated to miscUtils-R2-2-3
+	* Added some timing diagnostic functions
+		int evrGetLastFiducial();
+		unsigned long long evrGetFiducialTsc();
+
 evrClient-R1-0-p6: 2016-04-19 K. Kim
 	* FPGA junction temperature reading for SLAC-EVR
 
