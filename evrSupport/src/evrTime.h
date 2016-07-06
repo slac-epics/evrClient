@@ -89,7 +89,6 @@ int evrTimePutPulseID     (epicsTimeStamp  *epicsTime_ps,
                            unsigned int     pulseID);
 
 /* Routines for timing diagnostics */
-int evrGetLastFiducial( );
 unsigned long long evrGetFiducialTsc();
 
 /* Routines used only by event module and Mpg application */

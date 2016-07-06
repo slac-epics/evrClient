@@ -19,3 +19,5 @@ dbd
 include
 lib
 restore
+make.log
+tags

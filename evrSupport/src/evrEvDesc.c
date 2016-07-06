@@ -38,7 +38,6 @@ static long aSubEvDesc(aSubRecord *prec)
     char *outString  = (char*)prec->vala;    /* Event Name Output to OUTA */
     long eventNumber = *((long*)(prec->a));  /* get Event number from INPA */
     epicsEnum16        sevr;                 /* alarm severity for event name array */
-    long status;
 
     if(dbGetSevr(&prec->inpc, &sevr)) {
         printf("%s: CA connection serverity check error\n", prec->name);
