@@ -1033,12 +1033,13 @@ static void eevrmaEventHandler(EvrmaSession session, void *handlerArg, int event
 		
 		struct evr_data_fifo_event *evData = (struct evr_data_fifo_event *)dataEvent;
 		
-		if(event_showme>0) { event_showme--; printf("FIFOEvent: %d\n", event); }
+		if(event_showme>0) { event_showme--; printf("FIFOEvent: %d, fid %d\n", event, evData->seconds); }
 		if (vevr->devEventFunc != NULL) {
 			
 #ifdef DONT_CALL_EPICS_CALLBACKS
 #else
-			(*vevr->devEventFunc)(vevr, event, evData->timestamp);
+			/* evData->seconds contains the fiducial */
+			(*vevr->devEventFunc)(vevr, event, evData->seconds);
 #endif
 			
 		}
