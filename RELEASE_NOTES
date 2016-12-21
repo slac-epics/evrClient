@@ -1,5 +1,7 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
+R1.1.0: 2016-12-20 B. Hill
+	* Updated to build w/ git workflow
 
 evrClient-R1-0-p7: 2016-06-23 B. Hill
 	* Updated to miscUtils-R2-2-3

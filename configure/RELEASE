@@ -1,45 +1,11 @@
-#RELEASE Location of external products
+# RELEASE Location of external products
 # Run "gnumake clean uninstall install" in the application
 # top directory each time this file is changed.
 
 # =============================================================
-# Define the top of the EPICS tree for your site.
-# We will build some tools/scripts that allow us to
-# change this easily when relocating software.
+# External module dependencies now defined in RELEASE.local
 # ==============================================================
-include $(TOP)/RELEASE_SITE
-#EPICS_SITE_TOP=/afs/slac/g/lcls/epics
-TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
+-include $(TOP)/configure/RELEASE.local
 
-
-# =============================================================
-# Define location of module tree with respect to
-# EPICS_SITE_TOP
-# =============================================================
-EPICS_MODULES=$(MODULES_SITE_TOP)
-
-# ==============================================================
-# Define the version of EPICS BASE that you will use
-# =============================================================
-BASE_MODULE_VERSION=$(EPICS_BASE_VER)
-
-# =============================================================
-# Define the version of modules needed by
-# IOC apps or other Support apps
-# =============================================================
-#GENERALTIME_MODULE_VERSION=generalTime-R2-2-1
-MISCUTILS_MODULE_VERSION=miscUtils-R2-2-3
-
-# ============================================================
-# External Support
-# ============================================================
-#GENERALTIME=$(EPICS_MODULES)/generalTime/$(GENERALTIME_MODULE_VERSION)
-MISCUTILS=$(EPICS_MODULES)/miscUtils/$(MISCUTILS_MODULE_VERSION)
-
-# =================================================================
-# Define EPICS_BASE
-# EPICS_BASE usually appears last so other apps can override stuff:
-# =================================================================
-EPICS_BASE=$(EPICS_SITE_TOP)/base/$(BASE_MODULE_VERSION)
 
 # End of file
