@@ -6,6 +6,9 @@ R1.2.0 2017-03-29 Kukhee Kim (KHKIM)
         * Update to use evrma version R1.0.7
         * Update to build for linuxRT environment
 
+R1.1.1: 2017-02-03 B. Hill
+	* Added support for linuxRT-x86_64 target arch
+
 R1.1.0: 2016-12-20 B. Hill
 	* Updated to build w/ git workflow
 
