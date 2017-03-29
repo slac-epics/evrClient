@@ -1,5 +1,11 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
+R1.2.0 2017-03-29 Kukhee Kim (KHKIM)
+        * Update to use recent buildroot: buildroot-2016.11.1-x86_64
+        * Update to use evrmaDriver version R1.0.7
+        * Update to use evrma version R1.0.7
+        * Update to build for linuxRT environment
+
 R1.1.0: 2016-12-20 B. Hill
 	* Updated to build w/ git workflow
 
