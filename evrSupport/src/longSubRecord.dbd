@@ -131,7 +131,7 @@ recordtype(longSub) {
 	}
 	field(INPT,DBF_INLINK) {
 		prompt("Input T")
-		promtgroup(GUI_INPUTS)
+		promptgroup(GUI_INPUTS)
 		interest(1)
 	}
 	field(INPU,DBF_INLINK) {

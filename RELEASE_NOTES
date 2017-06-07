@@ -1,5 +1,8 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
+R1.3.0 2017-06-07 Hugo Slepicka (SLEPICKA)
+        * Fixed typo "promtgroup" -> "promptgroup" at evrSupport/src/longSubRecord.dbd
+
 R1.2.0 2017-03-29 Kukhee Kim (KHKIM)
         * Update to use recent buildroot: buildroot-2016.11.1-x86_64
         * Update to use evrmaDriver version R1.0.7
