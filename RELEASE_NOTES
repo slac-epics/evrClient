@@ -3,6 +3,10 @@ Release Notes for the evrClient and event package
 
 bsa_core: 2018-05-08 Kukhee Kim (KHKIM)
         * branch out from R1.3.1 to support Till's new BsaCore
+        * integrated with BsaCore
+        * bump up miscUtil R2.2.5
+        * build against timingApi R0.6
+        * build against BsaCore   R1.3.3
 
 R1.3.1: 2017-09-25 Kukhee Kim (KHKIM)
         * build against evrmaDriver version R1.0.8
