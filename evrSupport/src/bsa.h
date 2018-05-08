@@ -41,12 +41,19 @@ int bsaSecnAvg(epicsTimeStamp *secnTime_ps,
                int             noAveraging,
                void           *dev_ps);
  
+void bsaChecker(void *, const BsaTimingData *);
+
+int bsaCheckerDevices(epicsTimeStamp *edefTimeInit_ps,
+                      epicsTimeStamp *edefTime_ps,
+                      epicsUInt32    edefAllDone,
+                      int            edefAvgDone,
+                      epicsEnum16    edefSevr,
+		      int            edefIdx);
+ 
 int bsaSecnInit(char          *secnName,
                 int            noAverage,
                 void         **dev_pps);
 
-
-int bsaInit(void);
 
 #ifdef __cplusplus
 }

@@ -76,6 +76,7 @@
 #include "evrTime.h"          /* evrTimeGetFromEdef        */
 #include "evrPattern.h"       /* EDEF_MAX                  */
 #include "bsa.h"              /* prototypes in this file   */
+#include "drvEvr.h"
 
 #include "bsaCallbackApi.h"
 
@@ -108,7 +109,6 @@ typedef struct {
 
 } bsa_ts;
 
-
 /* BSA devices */
 typedef struct {
   ELLNODE node;
@@ -118,10 +118,35 @@ typedef struct {
 
 } bsaDevice_ts;
 
+typedef struct {
+  epicsTimeStamp edefTimeInit_s;
+  epicsTimeStamp edefTime_s;
+  epicsUInt32    edefAllDone;
+  int            edefAvgDone;
+  epicsEnum16    edefSevr;
+  int            edefIdx;
+} BsaChecker_ts;
+
+union BsaChecker_tu;
+
+typedef union BsaChecker_tu {
+  BsaChecker_ts        s;
+  union BsaChecker_tu *n;
+} BsaChecker_tu;
+
+static BsaChecker_tu *bsaCheckerAlloc();
+static void           bsaCheckerFree(BsaChecker_tu*);
+
 ELLLIST bsaDeviceList_s;
 static epicsMutexId bsaRWMutex_ps = 0;
+static epicsMutexId bsaFLMutex_ps = 0;
 
+static BsaChecker_tu *bsaCheckerFL = 0;
 
+int QueueFullCounter = 0;
+
+/* For overloaded IOC, do not insert NaNs, while missing data, if this flag is = 0.*/
+static volatile int NaNflag = INSERT_NAN;
 
 
 /*=============================================================================
@@ -328,6 +353,219 @@ printf("calling bsaProcessor secnSevr %d\n", secnSevr);
 
 /*=============================================================================
 
+  Name: bsaCheckerAlloc/bsaCheckerFree
+
+  Abs:  maintain free list of BsaChecker_tu unions. These care submitted
+        as 'work jobs' to the eventTask.
+
+  Args: alloc: None. free: pointer previously obtained by alloc
+
+  Rem:
+
+  Ret:  memory (alloc), void (free)
+
+==============================================================================*/
+
+static BsaChecker_tu *
+bsaCheckerAlloc()
+{
+BsaChecker_tu *rval;
+epicsMutexMustLock( bsaFLMutex_ps );
+	if ( (rval = bsaCheckerFL) ) {
+		bsaCheckerFL = rval->n;
+	}
+epicsMutexUnlock( bsaFLMutex_ps );
+	if ( ! rval ) {
+		rval = malloc( sizeof( *rval ) );
+	}
+	return rval;
+}
+
+static void
+bsaCheckerFree(BsaChecker_tu *p)
+{
+epicsMutexMustLock( bsaFLMutex_ps );
+	p->n         = bsaCheckerFL;
+	bsaCheckerFL = p;
+epicsMutexUnlock( bsaFLMutex_ps );
+}
+
+
+/*=============================================================================
+
+  Name: bsaCheckerWorker
+
+  Abs:  Wrapper for bsaCheckerDevices to be executed by eventTask.
+
+  Args: BsaChecker_tu * -- pointer to argument struct/union
+
+  Rem:
+
+  Ret:  VOID
+
+==============================================================================*/
+
+
+static void
+bsaCheckerWorker(void *arg)
+{
+BsaChecker_tu *checkArg = (BsaChecker_tu*)arg;
+
+	bsaCheckerDevices(
+	    &checkArg->s.edefTimeInit_s,
+	    &checkArg->s.edefTime_s,
+	    checkArg->s.edefAllDone,
+	    checkArg->s.edefAvgDone,
+	    checkArg->s.edefSevr,
+	    checkArg->s.edefIdx);
+
+	bsaCheckerFree( checkArg );
+}
+
+
+/*=============================================================================
+ *
+ *     Name: evrBsaMessage
+ *
+ *     Abs:  evrBsaMessage initialization.
+ *
+ *     Rem:  Add Message to evrEventTask Queue to Check BSA Data.
+ *
+=============================================================================*/
+static int evrBsaMessage(epicsTimeStamp *edefTimeInit_ps,
+                  epicsTimeStamp *edefTime_ps,
+                  epicsUInt32    edefAllDone,
+                  int            edefAvgDone,
+                  epicsEnum16    edefSevr,
+                  int            edefIdx)
+{
+BsaChecker_tu *checkArg = bsaCheckerAlloc();
+
+    checkArg->s.edefTimeInit_s = *edefTimeInit_ps;
+    checkArg->s.edefTime_s     = *edefTime_ps;
+    checkArg->s.edefAllDone    = edefAllDone;
+    checkArg->s.edefAvgDone    = edefAvgDone;
+    checkArg->s.edefSevr       = edefSevr;
+    checkArg->s.edefIdx        = edefIdx;
+    /* If queue is full, then forget about checking BSA for this pulse. */
+    return eventTaskTrySendWork( bsaCheckerWorker, (void*) checkArg );
+}
+
+
+/*=============================================================================
+
+  Name: bsaChecker
+
+  Abs:  Beam Synchronous Acquisition Checker.  It is called by the 360hz fiducial
+        task right before moving the pipeline. It gives information to bsaCheckerDevices
+	that is called by evrEventTask at sligthly lower priority to fill in any missing
+        data for any EDEF requesting new data and data for the previous acquisition
+	is not yet received.
+
+  Args: None.
+
+  Rem:
+
+  Ret:  0 = OK, -1 = Mutex problem .
+
+==============================================================================*/
+
+void bsaChecker(void *uarg, const BsaTimingData *pBsaData)
+{
+epicsTimeStamp edefTimeInit_s;
+epicsTimeStamp edefTime_s;
+epicsUInt32    edefAllDone;
+int            edefAvgDone;
+epicsEnum16    edefSevr;
+int            status = 0;
+int            idx;
+unsigned long  edefMask;
+
+	if ( INSERT_NAN != NaNflag ) {
+		return;
+	}
+
+	edefAllDone  = pBsaData->edefAllDoneMask;
+
+	if ( pBsaData->edefActiveMask  || edefAllDone ) {
+		for ( idx = 0, edefMask = 1; idx < EDEF_MAX; idx++, edefMask <<= 1 ) {
+			/* If EDEF active on the next pulse? Or finished? */
+			if ( (pBsaData->edefActiveMask | edefAllDone) & edefMask ) {
+				/* Get EDEF information for the last acquistion. */
+				if (evrTimeGetFromEdef(idx, &edefTime_s, &edefTimeInit_s, &edefAvgDone, &edefSevr)) {
+					status = -1;
+					continue;
+				}
+				/* Get EDEF information regarding the queue called in bsaChecker, it returns -1 if the queue is full. */
+				status = evrBsaMessage(&edefTimeInit_s,
+						&edefTime_s,
+						edefAllDone, edefAvgDone, edefSevr, idx);
+				if (status == -1) QueueFullCounter++;
+			}/* end of EDEF active on next pulse */
+		}/* end of EDEF loop */
+	}/* end of any EDEF active on next pulse */
+}/*end bsaChecker*/
+
+
+/*============================================================================
+ *
+ *   Name: bsaCheckerDevices
+ *
+ *     Abs:  Beam Synchronous Acquisition Checker.  It is called by the evrEventTask.
+ *           It fills in any missing data for any EDEF requesting new data
+ *           and data for the previous acquisition is not yet received.
+ *
+ *     Args: Type                Name             Access     Description
+ *         ------------------- -----------       ---------- ----------------------------
+ *         epicsTimeStamp *    edefTimeInit_ps    Read       Data timestamp
+ *         epicsTimeStamp *    edefTime_ps        Read       Data timestamp
+ *         epicsUInt32         edefAllDone        Read	     EDEF flag acquisition
+ *         int                 edefAvgDone	  Read       EDEF flag average done
+ *         epicsEnum16         edefSevr           Read       EDEF severity
+ *	   int		       edefIdx		  Read       EDEF index
+ *     Rem:
+ *
+ *     Ret:  0 = OK, -1 = Mutex problem .
+ *
+==============================================================================*/
+int bsaCheckerDevices(epicsTimeStamp *edefTimeInit_ps,
+                      epicsTimeStamp *edefTime_ps,
+                      epicsUInt32    edefAllDone,
+                      int            edefAvgDone,
+                      epicsEnum16    edefSevr,
+		      int 	     edefIdx)
+{
+  bsaDevice_ts  *dev_ps;
+  bsa_ts        *bsa_ps;
+  /* Now go through all devices and check if they haven't provided data
+   *      for the last acquisition. */
+  if ((!bsaRWMutex_ps) || epicsMutexLock(bsaRWMutex_ps))
+    return -1;
+  dev_ps = (bsaDevice_ts *)ellFirst(&bsaDeviceList_s);
+  while (dev_ps) {
+    /* Fill in invalid data if the last time the device was processed is not the same as
+     *        the last requested acquisition */
+    bsa_ps = &dev_ps->bsa_as[edefIdx];
+    if ((bsa_ps->timeData.secPastEpoch != edefTime_ps->secPastEpoch) ||
+        (bsa_ps->timeData.nsec         != edefTime_ps->nsec)) {
+      bsaProcessor(edefTime_ps, 0.0, SOFT_ALARM, INVALID_ALARM, dev_ps->noAverage,
+                   edefTimeInit_ps, edefAvgDone, edefSevr, bsa_ps);
+      /* Update diagnostics counter for missing data. When it reaches the limit, then it gets reset. */
+      if (bsa_ps->missing < EVR_MAX_MISS ) {
+        bsa_ps->missing++;
+      } else {
+        bsa_ps->missing = 0;
+      }
+    }
+    dev_ps = (bsaDevice_ts *)ellNext(&dev_ps->node);
+  }
+  epicsMutexUnlock(bsaRWMutex_ps);
+  return 0;
+}
+
+
+/*=============================================================================
+
   Name: bsaSecnInit
 
   Abs:  Beam Synchronous Acquisition Processing Initialization for a Device
@@ -373,35 +611,33 @@ int bsaSecnInit(char  *secnName,
   }
   return -1;
 }
-
 
 /*=============================================================================
- 
-   Name: bsaInit
 
-   Abs:  Beam Synchronous Acquisition Processing Global Initialization
+  Name: bsaInit
 
-   Args: None.
+  Abs:  Beam Synchronous Acquisition Processing Global Initialization
 
-   Rem:
+  Args: None.
 
-   Ret:  0 = OK, -1 = Mutex creation error
+  Rem:  Always succeeds (or raises fatal error)
 
- ==============================================================================*/
+  Ret:  0
 
-int bsaInit()
+==============================================================================*/
+
+static int bsaInit(int pass)
 {
-  if (!bsaRWMutex_ps) {
-    bsaRWMutex_ps = epicsMutexCreate();
-    if (bsaRWMutex_ps) {
-      ellInit(&bsaDeviceList_s);
-    } else {
-      return -1;
-    }
-  }
+	if ( 0 == pass ) {
+		if (!bsaRWMutex_ps) {
+			bsaRWMutex_ps = epicsMutexMustCreate();
+			bsaFLMutex_ps = epicsMutexMustCreate();
+			ellInit(&bsaDeviceList_s);
+			RegisterBsaTimingCallback(bsaChecker, 0);
+		}
+	}
   return 0;
 }
-
 
 /*=============================================================================
 
@@ -561,6 +797,21 @@ printf("Calling bsaSecnAvg %d; PID %d\n", input_severity, input_timestamp.nsec &
   return status;
 
 }
+
+/*Set Method for the NaNflag used by the ioc */
+void setNaN_flag(int flag){
+        if ((flag==0) || (flag==1)){
+                NaNflag=flag;
+        }
+        else{ /*The expectation is that is called only once at startup */
+                printf("setNaN_flag: illegal value %i for NAN flag. Value must be 0 or 1.",flag);
+        }
+}
+/*Get Method for the NaNflag used by the ioc */
+int getNaN_flag(void){
+        return   NaNflag;
+}
+
 
 /* Create the device support entry tables */
 typedef struct
@@ -589,7 +840,7 @@ DSET devBsa =
 {
   6,
   NULL,
-  NULL,
+  (DEVSUPFUN)bsaInit,
   init_bsa_record,
   get_ioint_info,
   read_bsa,
