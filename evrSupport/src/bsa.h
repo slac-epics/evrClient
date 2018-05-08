@@ -26,6 +26,8 @@
 #ifndef INCbsaH
 #define INCbsaH 
 
+#include "bsaCallbackApi.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,13 +40,13 @@ int bsaSecnAvg(epicsTimeStamp *secnTime_ps,
                epicsEnum16     secnSevr,
                int             noAveraging,
                void           *dev_ps);
-  
+ 
 int bsaSecnInit(char          *secnName,
                 int            noAverage,
                 void         **dev_pps);
 
-int bsaInit(void);
 
+int bsaInit(void);
 
 #ifdef __cplusplus
 }

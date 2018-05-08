@@ -5,7 +5,7 @@
 *     Operator of Los Alamos National Laboratory.
 * EPICS BASE Versions 3.13.7
 * and higher are distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
+* in file LICENSE that is included with this distribution.
 \*************************************************************************/
 /* recSub.c */
 /* base/src/rec  subRecord.c,v 1.25.2.1 2003/09/16 18:58:10 norume Exp */
@@ -36,6 +36,8 @@
 #include "bsaRecord.h"
 #undef  GEN_SIZE_OFFSET
 #include "epicsExport.h"
+#include "epicsMath.h"
+#include "cantProceed.h"
 
 /* Create RSET - Record Support Entry Table*/
 #define report NULL
@@ -44,8 +46,8 @@ static long init_record();
 static long process();
 #define special NULL
 #define get_value NULL
-#define cvt_dbaddr NULL
-#define get_array_info NULL
+static long cvt_dbaddr(DBADDR *);
+static long get_array_info(DBADDR *, long *, long *);
 #define put_array_info NULL
 static long get_units();
 static long get_precision();
@@ -94,7 +96,18 @@ static long init_record(struct bsaRecord *pbsa, int pass)
 {
     DSET *pdset;
 
-    if (pass==0) return(0);
+    if (pass==0) {
+		pbsa->nord = 0;
+		if ( pbsa->nelm == 0 ) {
+			pbsa->nelm = 1;
+		}
+		pbsa->val  = malloc( sizeof(*pbsa->val ) * pbsa->nelm );
+		pbsa->rms  = malloc( sizeof(*pbsa->rms ) * pbsa->nelm );
+		pbsa->cnt  = malloc( sizeof(*pbsa->cnt ) * pbsa->nelm );
+		pbsa->pid  = malloc( sizeof(*pbsa->pid ) * pbsa->nelm );
+		pbsa->pidu = malloc( sizeof(*pbsa->pidu) * pbsa->nelm );
+		return(0);
+	}
 
     if(!(pdset = (DSET *)(pbsa->dset))) {
         recGblRecordError(S_dev_noDSET,(void *)pbsa,"bsa: init_record");
@@ -127,6 +140,53 @@ static long process(struct bsaRecord * pbsa)
         return(status);
 }
 
+static long cvt_dbaddr(DBADDR *paddr)
+{
+	struct bsaRecord *pbsa = (struct bsaRecord *)paddr->precord;
+	paddr->no_elements = pbsa->nelm;
+	if ( paddr->pfield == &pbsa->val ) {
+		paddr->field_type = DBF_DOUBLE;
+	} else if ( paddr->pfield == &pbsa->rms  ) {
+		paddr->field_type = DBF_DOUBLE;
+	} else if ( paddr->pfield == &pbsa->pid  ) {
+		paddr->field_type = DBF_LONG;
+	} else if ( paddr->pfield == &pbsa->pidu ) {
+		paddr->field_type = DBF_LONG;
+	} else if ( paddr->pfield == &pbsa->cnt  ) {
+		paddr->field_type = DBF_LONG;
+	} else {
+		cantProceed("Invalid field in bsaRecord::cvt_dbaddr");
+		return -1;
+	}
+	paddr->field_size     = dbValueSize( paddr->field_type );
+	paddr->dbr_field_type = paddr->field_type;
+	return 0;
+}
+
+static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
+{
+struct bsaRecord *pbsa = (struct bsaRecord *)paddr->precord;
+
+	if ( paddr->pfield == &pbsa->val ) {
+		paddr->pfield = pbsa->val;
+	} else if ( paddr->pfield == &pbsa->rms  ) {
+		paddr->pfield = pbsa->rms;
+	} else if ( paddr->pfield == &pbsa->pid  ) {
+		paddr->pfield = pbsa->pid;
+	} else if ( paddr->pfield == &pbsa->pidu ) {
+		paddr->pfield = pbsa->pidu;
+	} else if ( paddr->pfield == &pbsa->cnt  ) {
+		paddr->pfield = pbsa->cnt;
+	} else {
+		cantProceed("Invalid field in bsaRecord::cvt_dbaddr");
+		return -1;
+	}
+
+	*no_elements = pbsa->nord;
+	*offset      = 0;
+	return 0;
+}
+
 static long get_units(struct dbAddr *paddr, char *units)
 {
     struct bsaRecord *pbsa=(struct bsaRecord *)paddr->precord;
@@ -175,54 +235,85 @@ static long get_control_double(struct dbAddr *paddr, struct dbr_ctrlDouble *pcd)
     return(0);
 }
 
+
 static void monitor(struct bsaRecord *pbsa)
 {
 	unsigned short	monitor_mask, save_monitor_mask;
 	double		delta;
 
         /* get previous stat and sevr  and new stat and sevr*/
-        save_monitor_mask = recGblResetAlarms(pbsa);
+        monitor_mask = save_monitor_mask = recGblResetAlarms(pbsa);
         /* check for value change */
-        delta = pbsa->mlst - pbsa->val;
-        if(delta<0.0) delta = -delta;
-        if (delta > pbsa->mdel) {
-                /* post events for value change */
-                save_monitor_mask |= DBE_VALUE;
-                /* update last value monitored */
-                pbsa->mlst = pbsa->val;
-        }
-        /* check for archive change */
-        monitor_mask = save_monitor_mask;
-        delta = pbsa->alst - pbsa->val;
-        if(delta<0.0) delta = -delta;
-        if (delta > pbsa->adel) {
-                /* post events on value field for archive change */
-                monitor_mask |= DBE_LOG;
-                /* update last archive value monitored */
-                pbsa->alst = pbsa->val;
-        }
-        /* send out monitors connected to the value field */
-        if (monitor_mask) db_post_events(pbsa,&pbsa->val,monitor_mask);
-        /* check for RMS archive change */
-        monitor_mask = save_monitor_mask;
-        if (pbsa->rms != pbsa->rlst) {
-                /* post events on value field for archive change */
-                monitor_mask |= DBE_VALUE|DBE_LOG;
-                /* update last archive value monitored */
-                pbsa->rlst = pbsa->rms;
-        }
-        /* send out monitors connected to the rms field */
-        if (monitor_mask) db_post_events(pbsa,&pbsa->rms,monitor_mask);
-        /* check for CNT archive change */
-        monitor_mask = save_monitor_mask;
-        if (pbsa->cnt != pbsa->clst) {
-                /* post events on value field for archive change */
-                monitor_mask |= DBE_VALUE|DBE_LOG;
-                /* update last archive value monitored */
-                pbsa->clst = pbsa->cnt;
-        }
-        /* send out monitors connected to the cnt field */
-        if (monitor_mask) db_post_events(pbsa,&pbsa->cnt,monitor_mask);
+
+		if ( pbsa->nord > 0 ) {
+			unsigned i = pbsa->nord - 1; /* just look at newest element */
+
+			if (isnan(pbsa->val[i]) || isnan(pbsa->mlst)) {
+				delta = pbsa->mdel + 1;
+			} else {
+				delta = pbsa->mlst - pbsa->val[i];
+				if( delta < 0.0 ) {
+					delta = -delta;
+				}
+			}
+			if (delta > pbsa->mdel) {
+				/* post events for value change */
+				save_monitor_mask |= DBE_VALUE;
+				/* update last value monitored */
+				pbsa->mlst = pbsa->val[i];
+			}
+			/* check for archive change */
+			monitor_mask = save_monitor_mask;
+			delta = pbsa->alst - pbsa->val[i];
+			if(delta<0.0) delta = -delta;
+			if (delta > pbsa->adel) {
+				/* post events on value field for archive change */
+				monitor_mask |= DBE_LOG;
+				/* update last archive value monitored */
+				pbsa->alst = pbsa->val[i];
+			}
+			/* send out monitors connected to the value field */
+			if (monitor_mask) db_post_events(pbsa,&pbsa->val,monitor_mask);
+			/* check for RMS archive change */
+			monitor_mask = save_monitor_mask;
+			if (pbsa->rms[i] != pbsa->rlst) {
+				/* post events on value field for archive change */
+				monitor_mask |= DBE_VALUE|DBE_LOG;
+				/* update last archive value monitored */
+				pbsa->rlst = pbsa->rms[i];
+			}
+			/* send out monitors connected to the rms field */
+			if (monitor_mask) db_post_events(pbsa,&pbsa->rms,monitor_mask);
+			/* check for CNT archive change */
+			monitor_mask = save_monitor_mask;
+			if (pbsa->cnt[i] != pbsa->clst) {
+				/* post events on value field for archive change */
+				monitor_mask |= DBE_VALUE|DBE_LOG;
+				/* update last archive value monitored */
+				pbsa->clst = pbsa->cnt[i];
+			}
+			/* send out monitors connected to the cnt field */
+			if (monitor_mask) db_post_events(pbsa,&pbsa->cnt,monitor_mask);
+			/* check for PID archive change */
+			monitor_mask = save_monitor_mask;
+			if (pbsa->pid[i] != pbsa->plst) {
+				/* post events on value field for archive change */
+				monitor_mask |= DBE_VALUE|DBE_LOG;
+				/* update last archive value monitored */
+				pbsa->plst = pbsa->pid[i];
+			}
+			/* send out monitors connected to the pid field */
+			if (monitor_mask) db_post_events(pbsa,&pbsa->pid,monitor_mask);
+
+			if (pbsa->pidu[i] != pbsa->ulst) {
+				/* post events on value field for archive change */
+				monitor_mask |= DBE_VALUE|DBE_LOG;
+				/* update last archive value monitored */
+				pbsa->ulst = pbsa->pidu[i];
+			}
+			/* send out monitors connected to the pidu field */
+			if (monitor_mask) db_post_events(pbsa,&pbsa->pidu,monitor_mask);
+		}
         /* Do diagnostics now */
         monitor_mask = save_monitor_mask;
         if (pbsa->noch != pbsa->lnoc) {
@@ -236,6 +327,10 @@ static void monitor(struct bsaRecord *pbsa)
         if (pbsa->rcnt != pbsa->lrct) {
                 db_post_events(pbsa,&pbsa->rcnt,monitor_mask|DBE_VALUE|DBE_LOG);
                 pbsa->lrct = pbsa->rcnt;
+        }
+	if (pbsa->miss != pbsa->lmis) {
+                db_post_events(pbsa,&pbsa->miss,monitor_mask|DBE_VALUE|DBE_LOG);
+                pbsa->lmis = pbsa->miss;
         }
         return;
 }
