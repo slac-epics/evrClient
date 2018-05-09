@@ -85,12 +85,15 @@ typedef struct {
 
 } evrFiducialFunc_ts;
 
-typedef struct {
-  epicsInt16 eventNum;
-} EventMessage;
-
 ELLLIST evrFiducialFuncList_s;
 static epicsMutexId evrRWMutex_ps = 0; 
+
+typedef struct {
+  EventTaskWorker worker;
+  void           *work;
+} evrIoMessage_ts;
+
+static void evrIoEventWork(void *arg);
 
 
 /*=============================================================================
@@ -226,7 +229,6 @@ void evrSend(void *pVoidCard, epicsInt16 messageSize, void *message)
 void evrEvent(int cardNo, epicsInt16 eventNum, epicsUInt32 timeNum)
 {
   epicsUInt32  evrClockCounter;
-  EventMessage eventMessage;
 
   evrTimeCount((unsigned int)eventNum);
 
@@ -243,12 +245,14 @@ void evrEvent(int cardNo, epicsInt16 eventNum, epicsUInt32 timeNum)
       evrMessageNoDataError(EVR_MESSAGE_FIDUCIAL);
     }
   } else {
+
+         uintptr_t arg = (uintptr_t)eventNum;
 	  /*---------------------
 	   * Schedule processing for any event-driven records
 	   */
+         eventTaskSendWork(evrIoEventWork, (void*)arg);
 
-	  eventMessage.eventNum  = eventNum;
-	  epicsMessageQueueSend( eventTaskQueue, &eventMessage, sizeof(eventMessage) );
+
   }
  
 }
@@ -268,7 +272,6 @@ static int evrTask()
   epicsEventWaitStatus status;
   epicsUInt32          mpsModifier;
   int                  messagePending;
-  EventMessage         eventMessage;
 
   if (evrTimeInit(0,0)) {
     errlogPrintf("evrTask: Exit due to bad status from evrTimeInit\n");
@@ -279,8 +282,6 @@ static int evrTask()
     errlogPrintf("evrTask: could not find an EVR module\n");
     return -1;
   }
-
-  eventMessage.eventNum  = EVENT_FIDUCIAL;
 
   for (;;)
   {
@@ -303,7 +304,8 @@ static int evrTask()
       }   
       evrMessageEnd(EVR_MESSAGE_FIDUCIAL);
 
-      epicsMessageQueueSend(eventTaskQueue, &eventMessage, sizeof(eventMessage));
+      uintptr_t arg = (uintptr_t) EVENT_FIDUCIAL;
+      eventTaskSendWork(evrIoEventWork, (void*)arg);
       messagePending = epicsMessageQueuePending(eventTaskQueue);
       evrMessageQ(EVR_MESSAGE_FIDUCIAL, messagePending);
 
@@ -355,25 +357,59 @@ static int evrRecord()
 }
 
 
+int
+eventTaskSendWork(EventTaskWorker worker, void *work)
+{
+evrIoMessage_ts eventMessage;
+
+        eventMessage.worker = worker;
+        eventMessage.work   = work;
+        return epicsMessageQueueSend( eventTaskQueue, &eventMessage, sizeof(eventMessage) );
+}
+
+int
+eventTaskTrySendWork(EventTaskWorker worker, void *work)
+{
+evrIoMessage_ts eventMessage;
+
+        eventMessage.worker = worker;
+        eventMessage.work   = work;
+        return epicsMessageQueueSend( eventTaskQueue, &eventMessage, sizeof(eventMessage) );
+}
+
+static void evrIoEventWork(void *arg)
+{
+uintptr_t  uarg     = (uintptr_t)arg; /* silence compiler warning */
+epicsInt16 eventNum = (epicsInt16)uarg;
+
+        evrTimeEventProcessing(eventNum);
+#ifdef BSA_DEBUG
+        printf("posting event %d\n", eventNum);
+#endif
+        post_event(eventNum);
+        /* pCard cannot be NULL since the only entities which send messages are
+         *  - the evrTask which bails out if pCard is NULL
+         *  - the evrEvent handler which is not installed if pCard is NULL
+         */
+        if ((eventNum >= 0 ) &&
+                        (eventNum < sizeof(pCard->IoScanPvt)/sizeof(pCard->IoScanPvt[0])) ) {
+                scanIoRequest( pCard->IoScanPvt[eventNum] );
+        }
+}
+
 static int evrEventTask(void)
 {
-	EventMessage eventMessage;
+    evrIoMessage_ts eventMessage;
 
-    for(;;) {   
+    for(;;) {
       epicsMessageQueueReceive(eventTaskQueue, &eventMessage, sizeof(eventMessage));
-      evrTimeEventProcessing(eventMessage.eventNum);
-      post_event(eventMessage.eventNum);
-      /* pCard cannot be NULL since the only entities which send messages are
-	   *  - the evrTask which bails out if pCard is NULL
-	   *  - the evrEvent handler which is not installed if pCard is NULL
-	   */
-      if ( eventMessage.eventNum >= 0 && eventMessage.eventNum < sizeof(pCard->IoScanPvt)/sizeof(pCard->IoScanPvt[0]) ) {
-		scanIoRequest( pCard->IoScanPvt[eventMessage.eventNum] );
-	  }
-    }
+      eventMessage.worker(eventMessage.work);
+        }
 
     return 0;
 }
+
+
 /*=============================================================================
                                                          
   Name: evrInitialize
@@ -392,6 +428,14 @@ int evrInitialize()
     return -1;
   }
   evrInitialized = -1;
+
+  eventTaskQueue = epicsMessageQueueCreate(MRF_NUM_EVENTS*2, sizeof(evrIoMessage_ts));
+  if ( ! eventTaskQueue ) {
+    errlogPrintf("evrInitialize: unable to create message queue\n");
+    return -1;
+  }
+
+
 
 
 #if defined(_X86_) || defined(_X86_64_)
@@ -434,7 +478,6 @@ int evrInitialize()
   pCard = ErGetCardStruct(0);
 #endif
   
-  eventTaskQueue = epicsMessageQueueCreate(256, sizeof(EventMessage));
   
   /* Create the processing tasks */
   if (!epicsThreadCreate("evrTask", epicsThreadPriorityHigh+1,
