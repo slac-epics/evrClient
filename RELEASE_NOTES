@@ -7,6 +7,8 @@ bsa_core: 2018-05-08 Kukhee Kim (KHKIM)
         * bump up miscUtil R2.2.5
         * build against timingApi R0.6
         * build against BsaCore   R1.3.3
+        * tag under bsa_core branch (R1.4.0-bsa_core)
+        * prepare to move to master branch
 
 R1.3.1: 2017-09-25 Kukhee Kim (KHKIM)
         * build against evrmaDriver version R1.0.8
