@@ -155,3 +155,66 @@ pattern { D , ATTR , LOC  , UN , SLCLNK , EG , HO , LO , PR , AD , MD , I , LNK 
 (11.4) Add a database to your application's Db/Makefile named similar to the file created in step 2, but with the ".db" extension.  Example: DB += IOC-DMP1-BC01bsa.db
 (11.5) Load you database in your IOC with dbLoadRecords.  Example: dbLoadRecords("db/IOC-DMP1-BC01bsa.db")
 
+
+
+---------------------
+How to switch BsaCore
+---------------------
+
+The evrClient module support BsaCore which performs better, provide both PV interface and API. (Please, look at detilas in BsaCore).
+If ioc engineer wants to switch to use BsaCore, Please, follow up the followings:
+
+1. evrclient requires the following configuration to work with the BsaCore.
+   (Versio number will be changed.)
+
+    EVENT_MODULE_VERSION=R1.4.1
+    TIMINGAPI_MODULE_VERSION=R0.6
+    BSACORE_MODULE_VERSION=R1.3.3
+
+    EVENT=$(EPICS_MODULES)/evrClient/$(EVENT_MODULE_VERSION)
+    TIMINGAPI=$(EPICS_MODULES)/timingApi/$(TIMINGAPI_MODULE_VERSION)
+    BSACORE=$(EPICS_MODULES)/BsaCore/$(BSACORE_MODULE_VERSION)
+
+
+2. make sure include the following DBD files in the applicaiton
+    
+    evrSupport.dbd
+    bsaCore.dbd
+
+3. make sure link with the following libraries when you build application
+    
+    evrSupport
+    BsaCore
+
+
+4. For the PV interface, nothing need to be changed. 
+   For API interface, Please, look at details in BsaCore.
+
+
+5. If ioc engineer want to keep use legacy bsa which has been impleted in event/evrClient.
+   (1) do not include bsaCore.dbd
+   (2) do not link with BsaCore
+   (3) link with evrSupportLegacy instead of evrSupport
+
+
+
+6. More information for library files.
+   evrClient build the following libraries
+
+   driver and device
+
+       devMrfEr  - device support er record
+       drvMrf    - epics driver to interface with evrma driver
+
+  
+   event and bsa support
+
+       eventBsaSupport  - library for PV interface for BsaCore, 
+                          use this library if you only want to use PV interface for BsaCore, you don't need event support
+                          ex) LCLS1 MR project, tprTrigger, tprPattern module support event and trigger.
+
+       evrSupport       - library for full support (event + BsaCore)
+
+       evrSupportLegacy - library for full support (event + legacy bsa)
+
+
