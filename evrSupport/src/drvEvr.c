@@ -37,6 +37,7 @@
 #include "evrTime.h"		/* for evrTimeCount       */
 #include "evrPattern.h"		/* for evrPattern         */
 #include "bsa.h"		/* for bsaInit            */
+#include "drvEvr.h"
 
 #ifdef USE_EVRMA
 #include "drvEvrma.h"
@@ -73,6 +74,7 @@ static epicsEventId     evrTaskEventSem   = NULL;  /* evr task semaphore  */
 static epicsEventId     evrRecordEventSem = NULL;  /* evr record task sem */
 static int readyForFiducial = 1;        /* evrTask ready for new fiducial */
 static int evrInitialized = 0;          /* evrInitialize performed        */
+int lastfid = -1;                       /* last fiducial seen */
 unsigned long long evrFiducialTsc = 0L;
 
 /* Fiducial User Function List */
@@ -160,6 +162,20 @@ unsigned long long evrGetFiducialTsc()
 /* Add to registry so function can be called w/o adding EVENT module dependency */
 epicsRegisterFunction(evrGetFiducialTsc);
 
+/*=============================================================================
+  Name: evrGetLastFiducial()
+
+  Abs: A simple routine to return the fiducial id for the most
+           recently received EVENT_FIDUCIAL.
+=============================================================================*/
+int evrGetLastFiducial( )
+{
+        return lastfid;
+}
+/* Add to registry so function can be called w/o adding EVENT module dependency */
+epicsRegisterFunction(evrGetLastFiducial);
+
+
 
 /*=============================================================================
  
@@ -216,6 +232,7 @@ void evrEvent(int cardNo, epicsInt16 eventNum, epicsUInt32 timeNum)
 
   if (eventNum == EVENT_FIDUCIAL) {
   	evrFiducialTsc = GetHiResTicks();
+    lastfid = timeNum;
     if (readyForFiducial) {
       readyForFiducial = 0;
       ErGetTicks(0, &evrClockCounter);

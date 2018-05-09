@@ -24,6 +24,8 @@
 #ifndef INCevrTimeH
 #define INCevrTimeH 
 
+#include "bsaCallbackApi.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -65,6 +67,13 @@ typedef epicsUInt32 evrModifier_ta[MAX_EVR_MODIFIER];
 #define EVENT_MODULO36_MIN      201      /* Min modulo 36 event code    */
 #define EVENT_MODULO36_MAX      236      /* Max modulo 36 event code    */
 #define MODULO36_MAX            36       /* # modulo 36 event codes     */
+
+/* For overloaded IOC, do not insert NaNs, while missing data, if this flag is = 0.*/
+#define INSERT_NAN 1
+#define NO_INSERT_NAN 0
+int
+getNaN_flag(void);
+
   
 typedef void (*FIDUCIALFUNCTION)(void *arg);
 
@@ -89,12 +98,14 @@ int evrTimePutPulseID     (epicsTimeStamp  *epicsTime_ps,
                            unsigned int     pulseID);
 
 /* Routines for timing diagnostics */
+int evrGetLastFiducial( );
 unsigned long long evrGetFiducialTsc();
 
 /* Routines used only by event module and Mpg application */
 #ifdef INCevrMessageH
-int evrTimeInit           (epicsInt32   firstTimeSlotIn,
+int evrTimeSetSlots       (epicsInt32   firstTimeSlotIn,
                            epicsInt32   secondTimeSlotIn);
+int evrTimeInit           ();
 int evrTime               (epicsUInt32  mpsModifier);
 long evrTimeEventProcessing(epicsInt16 eventNum);
 int evrTimeCount          (unsigned int eventCode);
