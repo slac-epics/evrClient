@@ -398,9 +398,6 @@ int evrInitialize()
   Get_evrTicksPerUsec_for_X86(); 
 #endif
 
-  /* Initialize BSA */
-  if (bsaInit()) return -1;
-  
   /* Create space for the pattern + diagnostics */
   if (evrMessageCreate(EVR_MESSAGE_PATTERN_NAME,
                        sizeof(evrMessagePattern_ts)) !=
