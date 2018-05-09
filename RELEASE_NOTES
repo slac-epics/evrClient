@@ -6,6 +6,15 @@ R1.4.1:  2018-05-09 Kukhee Kim (KHKIM)
         * support BsaCore
         * Catch up event module changes after evrClient was separated out from the event module
         * update README_BSA file, how to use evrClient with BsaCore
+        * align with the followings:
+
+          evrmaDriver   R1.0.8  (kernel driver)
+          evrma         R1.0.8  (api)
+
+          miscUtil      R2.2.5
+          timingApi     R0.6
+          BsaCore       R1.3.3
+
 
 bsa_core: 2018-05-08 Kukhee Kim (KHKIM)
         * branch out from R1.3.1 to support Till's new BsaCore
