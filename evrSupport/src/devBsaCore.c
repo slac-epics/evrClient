@@ -1,11 +1,11 @@
 /*=============================================================================
- 
+
   Name: devBsaCore.c
 
   Abs: Device support for BSA record. This is an adapter of the legacy
        BSA system to the backend of BsaCore.
-  Auth:  
-  Rev:  
+  Auth:
+  Rev:
 
   ---------------------------------------------------------------------------*/
 
@@ -23,6 +23,10 @@
 #include <alarm.h>
 #include <recGbl.h>
 #include <dbScan.h>
+#include <cantProceed.h>
+#include <envDefs.h>
+#include <initHooks.h>
+#include <ellLib.h>
 
 static void onInit(BsaChannel, const epicsTimeStamp *, void *);
 static void onResult(BsaChannel, BsaResult, unsigned, void *);
@@ -34,19 +38,59 @@ struct BsaSimpleDataSinkStruct theSink = {
 	OnAbort:  onAbort
 };
 
+typedef struct BsaRecNode_ {
+	ELLNODE           n;
+	struct bsaRecord *prec;
+} *BsaRecNode;
+
+static ELLLIST precList = ELLLIST_INIT;
+
 typedef struct BsaDpvt {
 	BsaResult results;
 	unsigned  numResults;
 	int       reset;
 } BsaDpvt;
 
+static ENV_PARAM doRegisterCb = {
+	name:  "EVENT_REGISTER_BSA_CALLBACK",
+	pdflt: "1"
+};
+
+static void initHook(initHookState state)
+{
+BsaChannel ch;
+BsaRecNode precNode;
+bsaRecord  *prec;
+
+	if ( initHookAfterIocRunning == state ) {
+		/* IOC is up; it is OK for BSA to scan records */
+
+		while ( (precNode = (BsaRecNode)ellGet( &precList )) ) {
+			prec = precNode->prec;
+			free( precNode );
+
+			if ( ! (ch = BSA_FindChannel( prec->inp.value.instio.string )) ) {
+				errlogPrintf("initHook(bsa,%s): unable to locate BSA channel for channel %s/edef %d\n", prec->name, prec->inp.value.instio.string, prec->edef);
+				continue;
+			}
+			if ( BSA_AddSimpleSink( ch, prec->edef - 1, &theSink, prec, prec->nelm ) ) {
+				errlogPrintf("init_record(bsa,%s): unable to add BSA sink for channel %s/edef %d\n", prec->name, prec->inp.value.instio.string, prec->edef);
+			}
+		}
+	}
+}
+
 static long init(int pass)
 {
+long v;
 	if ( 0 == pass ) {
-		if ( BSA_TimingCallbackRegister( RegisterBsaTimingCallback ) ) {
-			errlogPrintf("BSA: unable to register timing callback!\n");
-			return -1;
+		if ( envGetLongConfigParam(&doRegisterCb, &v) || v ) {
+			if ( BSA_TimingCallbackRegister( RegisterBsaTimingCallback ) ) {
+				errlogPrintf("BSA: unable to register timing callback!\n");
+				return -1;
+			}
 		}
+		initHookRegister( initHook );
 	}
 	return 0;
 }
@@ -55,6 +99,7 @@ static long init_record(bsaRecord *prec)
 {
 BsaChannel ch   = 0;
 BsaDpvt   *pvt;
+BsaRecNode precNode;
 
 long       rval = S_db_badField;
 
@@ -66,23 +111,31 @@ long       rval = S_db_badField;
 		goto bail;
 	}
 	if ( prec->edef <= 0 || prec->edef > EDEF_MAX ) {
-		errlogPrintf("init_record(bsa,%s): Invalid EDEF %d\n", prec->name, prec->edef); 
+		errlogPrintf("init_record(bsa,%s): Invalid EDEF %d\n", prec->name, prec->edef);
 		goto bail;
 	}
 	if ( ! (ch = BSA_CreateChannel( prec->inp.value.instio.string )) ) {
 		errlogPrintf("init_record(bsa,%s): unable to create BSA channel %s\n", prec->name, prec->inp.value.instio.string);
 		goto bail;
 	}
-	if ( BSA_AddSimpleSink( ch, prec->edef - 1, &theSink, prec, prec->nelm ) ) {
-		errlogPrintf("init_record(bsa,%s): unable to create BSA channel for channel %s/edef %d\n", prec->name, prec->inp.value.instio.string, prec->edef);
-		goto bail;
-	}
-	pvt             = (BsaDpvt*) malloc( sizeof(BsaDpvt) );
+	pvt             = (BsaDpvt*) mallocMustSucceed( sizeof(*pvt), "devBsaCore: unable to allocate memory for DPVT" );
 	pvt->numResults = 0;
 	pvt->results    = 0;
 	pvt->reset      = 0;
 	prec->dpvt      = pvt;
+
+	/* We cannot activate the BSA sink yet. The callbacks do record processing and this is 'legal' only
+	 * after the IOC is fully initialized (which is not yet the case when this code executes).
+	 * Thus, we defer activation of the sink to an 'initHook' which executes later...
+	 */
+
+	precNode        = (BsaRecNode) mallocMustSucceed( sizeof(*precNode), "devBsaCore: unable to allocate memory for initHook" );
+	precNode->prec  = prec;
+
+	ellAdd( &precList, &precNode->n );
+
 	rval            = 0;
+
 bail:
 	if ( rval ) {
 		if ( ch ) {
