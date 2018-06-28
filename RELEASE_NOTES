@@ -1,6 +1,24 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
 
+R1.4.3:  2018-06-28 Kukhee Kim (KHKIM)
+        * build against BsaCore R1.4.1
+        * apply Till's change on devBsaCore.c
+
+              devBsaCore: defer activation of BSA sink until
+              iocInit is in the initHookAfterIocRunning state.
+
+              The sink does process the BSA record which is
+              not 'legal' until the IOC is fully initialized.
+              This fix mitigates a scenario where triggers
+              are enabled prematurely (it is recommended to
+              enable triggers only after IOC initialization).
+
+              make automatic registration of timing callback optional
+              ...depending on an environment variable.
+
+
+
 R1.4.2:  2018-05-16 Kukhee Kim (KHKIM)
         * build against BsaCore R1.4.0
 R1.4.1:  2018-05-09 Kukhee Kim (KHKIM)
