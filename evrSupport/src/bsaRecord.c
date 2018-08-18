@@ -98,6 +98,7 @@ static long init_record(struct bsaRecord *pbsa, int pass)
 
     if (pass==0) {
 		pbsa->nord = 0;
+		pbsa->nlst = -1;
 		if ( pbsa->nelm == 0 ) {
 			pbsa->nelm = 1;
 		}
@@ -328,9 +329,13 @@ static void monitor(struct bsaRecord *pbsa)
                 db_post_events(pbsa,&pbsa->rcnt,monitor_mask|DBE_VALUE|DBE_LOG);
                 pbsa->lrct = pbsa->rcnt;
         }
-	if (pbsa->miss != pbsa->lmis) {
+		if (pbsa->miss != pbsa->lmis) {
                 db_post_events(pbsa,&pbsa->miss,monitor_mask|DBE_VALUE|DBE_LOG);
                 pbsa->lmis = pbsa->miss;
+        }
+		if (pbsa->nord != pbsa->nlst) {
+                db_post_events(pbsa,&pbsa->nord,monitor_mask|DBE_VALUE|DBE_LOG);
+                pbsa->nlst = pbsa->nord;
         }
         return;
 }

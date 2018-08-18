@@ -188,4 +188,9 @@ recordtype(bsa) {
 		prompt("Act. Length of Val/Rms etc. Arrays")
 		special(SPC_NOMOD)
 	}
+	field(NLST,DBF_LONG) {
+		prompt("Last NORD Monitored")
+		special(SPC_NOMOD)
+		interest(3)
+	}
 }
