@@ -72,6 +72,11 @@
 #define  EVR_TIME_OK 0
 #define  EVR_TIME_INVALID 1
 
+#ifndef  epicsTimeERROR
+#define  epicsTimeERROR -1
+#endif
+
+
 /* Pattern and timestamp table */
 typedef struct {
   evrMessagePattern_ts   pattern_s;
