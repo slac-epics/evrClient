@@ -20,6 +20,9 @@ DB += bsaProcTestAll.db
 # Device edef records
 DB += bsaATTREdef.db
 
+# bsa test template
+DB += bsaPulseId.db
+
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE

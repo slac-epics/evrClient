@@ -1,0 +1,11 @@
+record(ai, $(IOC,undefined):$(N):PULSEID) {
+  field(DESC, "Pulse ID")
+  field(SCAN, "$(SCAN,undefined)")
+  field(INP, " $(IOC,undefined):PATTERN360HZ.L")
+  field(EVNT, "$(EVNT,undefined)")
+  field(TSE, "-1")
+  field(TSEL, "$(IOC,undefined):PATTERN360HZ.TIME")
+  field(PRIO, "HIGH")
+  field(FLNK, "$(IOC,undefined):$(N):EFPULSEID")
+}
+

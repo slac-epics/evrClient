@@ -1,0 +1,176 @@
+------------------
+BSA Test Scenarios
+------------------
+
+1. Prepare application
+- install "bsaPulseId.db" into application
+  add the following line into $(TOP)/<application>App/Db/Makefile
+
+  DB_INSTALL += $(EVENT)/db/bsaPulseId.db    # database template for bsa data source (pulsed id)
+  DB_INSTALL += $(EVENT)/db/Bsa.db           # database template for bsa/compress/AO reco
+  
+- prepare database for two test cases
+  put the following lines into st.cmd
+  
+  # database for test case 0 #
+  dbLoadRecords("db/bsaPulseId.db", "IOC=<IOC_NAME>,SCAN=Event,EVNT=40,N=0")
+  dbLoadRecords("db/Bsa.db", "DEVICE=<IOC_NAME>:0,ATRB=PULSEID") 
+
+  # database for test case 1 #
+  
+  dbLoadRecords("db/bsaPulseId.db", "IOC=<IOC_NAME>,SCAN=Event,EVNT=41,N=1")
+  dbLoadRecords("db/Bsa.db", "DEVICE=<IOC_NAME>:1,ATRB=PULSEID")
+  
+  remark) the <IOC_NAME> should be same with IOC macro in db/Pattern.db.
+           if we have loaded up the Pattern.db with IOC=IOC:34:EV02 as the followings, 
+           
+           dbLoadRecords("db/Pattern.db","IOC=IOC:B34:EV02,SYS=SYS0")
+  
+           the <IOC_NAME> should be IOC:B34:EV02 
+ 
+
+2. test case 0 (120Hz source, 120Hz acquisition with average 3 samples)
+
+   - set up 120Hz BSA acquisition with average 3
+   . check up IRQ is enabled for event 40
+   . reserve a BSA dataslot,             caput IOC:IN20:EV01:EDEFNAME "myTest"
+   . set up EDEF masks, put 0x0 for all of the masks, put 0x36 to exclusion mask for modifier 2
+   . put 3 to number of average          caput EDEF:SYS0:<N>:AVGCNT  "3"
+   . put 2800 to number of measurement   caput EDEF:SYS0:<N>:MEASCNT "2800"
+   . start acquisition                   caput EDEF:SYS0:<N>:CTRL    "ON"
+   . wait until the CTRL PV turns to OFF
+
+   - verify the acquisition
+   . check up NUSE field in the history buffer     caget <IOC_NAME>:0:PULSEIDHST<N>.NUSE
+     it should be 2800
+     
+   . check up the history buffer                   caget <IOC_NAME>:0:PULSEIDHST<N>
+   . check up the pulse id history buffer          caget <IOC_NAME>:0:PULSEIDPIDHST<N>
+   
+     the history buffer should have a series of incremental number, interval 9, no nan
+     the pid history buffer should have a series of incremental number, the number should be history buffer + 3.
+     
+     the following are a typical example:
+      [khkim@lcls-dev3 ioc-b34-ev02]$ caget -# 10 IOC:B34:EV02:0:PULSEIDHST8
+      IOC:B34:EV02:0:PULSEIDHST8 10 3441 3450 3459 3468 3477 3486 3495 3504 3513 3522
+      [khkim@lcls-dev3 ioc-b34-ev02]$ caget -# 10 IOC:B34:EV02:0:PULSEIDPIDHST8
+      IOC:B34:EV02:0:PULSEIDPIDHST8 10 3444 3453 3462 3471 3480 3489 3498 3507 3516 3525
+      
+   . check up RMS history buffer                    caget <IOC_NAME>:0:PLUSEIDRMSHST<N>
+     the RMS should show always 3
+   . check up CNT history buffer                    caget <IOC_NAME>:0:PULSEIDCNTHST<N>
+     the CNT should show always 3
+      
+      
+3. test case 1 (60Hz source, 120Hz acquisition with no average)
+
+   - set up 120Hz BSA acquisition with no average
+   . check up IRQ is enabled for event 41
+   . reserve a BSA dataslot,             caput IOC:IN20:EV01:EDEFNAME "myTest"
+   . set up EDEF masks, put 0x0 for all of the masks, put 0x36 to exclusion mask for modifier 2
+   . put 1 to number of average          caput EDEF:SYS0:<N>:AVGCNT  "1"
+   . put 2800 to number of measurement   caput EDEF:SYS0:<N>:MEASCNT "2800"
+   . start acquisition                   caput EDEF:SYS0:<N>:CTRL    "ON"
+   . wait until the CTRL PV turns to OFF
+
+   - verify the acquisition
+   . check up NUSE field in the history buffer     caget <IOC_NAME>:1:PULSEIDHST<N>.NUSE
+     it should be 2800
+     
+   . check up the history buffer                   caget <IOC_NAME>:1:PULSEIDHST<N>
+     it should show pattern as data nan data nan data nan
+   . chekc up the CNT history buffer               caget <IOC_NAME>:1:PULSEIDCNTHST<N>
+     it should show pattern as 1 0 1 0 1 0 1 0
+         
+
+               
+
+-------------------------------
+Additional BSA Test Instruction
+--------------------------------
+Rev.0      8/28/2018
+
+Assuptions: BSA data source PV updates at 120Hz rate (at timeslot 4 and timeslot 1)
+            No severity filtering by BSA facility (the severity setting in EDEF keeps maximum: Invalid)
+            
+Notations:  PV name for BSA data source is <DATA_SOURCE>
+            PV name for BSA history buffer <DATA_SOURCE>HST<n>, <DATA_SOURCE>RMSHST<n>, <DATA_SOURCE>CNTHST<n>, <DATA_SOURCE>PIDHST<n>
+            
+            
+----------------------------
+120Hz data + 360Hz acquiring
+----------------------------
+1. reserve an EDEF:                caput IOC:IN20:EV01:EDEFNAME "BSA automatic test"
+2. assume EDEF <n> is reservered
+3. make 360Hz acquisition, cleanup all of maskbits and beam code
+                                   caput EDEF:SYS0:<n>:EXCLUSION[1..5] 0
+                                   caput EDEF:SYS0:<n>:INCLUSION[1..5] 0
+                                   caput EDEF:SYS0:<n>:BEAMCODE 0
+4. set no average, and max measure counter
+                                   caput EDEF:SYS0:<n>:AVGCNT 1
+                                   caput EDEF:SYS0:<n>:MEASCNT 2800
+5. start acquisition               caput EDEF:SYS0:<n>:CTRL "ON"
+6. wait until the acquisition is completed
+                                   camonitor EDEF:SYS0:<n>:CTRL     (until it turns to off)
+7. check up the total acquire is 2800
+                                   caget EDEF:SYS0:<n>:CNT
+8. check up the history buffer 
+                                   caget <DATA_SOURCE>.NUSE     (the NUSE should have 2800)
+                                   caget <DATA_SOURCE>HST<n>    (should have a pattern nan nan data nan nan data ...)
+                                   caget <DATA_SOURCE>CNT<n>    (should have a 0 0 1 0 0 1 ....)
+                                   caget <DATA_SOURCE>PID<n>    (should have consequence numbers p, p+1, p+2, p+3,....)
+
+-----------------------------------------
+120Hz data + 120Hz acquiriing, no average
+-----------------------------------------
+1. reserve an EDEF
+2. assume EDEF <N> is resereved
+3. make 120Hz acquisition
+                                   caput EDEF:SYS0:<n>:EXCLUSION1 0x36 
+                                   caput EDEF:SYS0:<n>:EXCLUSION[2..5] 0
+                                   caput EDEF:SYS0:<n>:INCLUSION[1..5] 0
+                                   caput EDEF:SYS0:<n>:BEAMCODE 0
+4. set no average, and max measure counter
+                                   caput EDEF:SYS0:<n>:AVGCNT 1
+                                   caput EDEF:SYS0:<n>:MEASCNT 2800
+5. start acquisition               caput EDEF:SYS0:<n>:CTRL "ON"
+6. wait until the acquisition is completed
+                                   camonitor EDEF:SYS0:<n>:CTRL     (until it turns to off)
+7. check up the total acquire is 2800
+                                   caget EDEF:SYS0:<n>:CNT
+8. check up the history buffer 
+                                   caget <DATA_SOURCE>.NUSE     (the NUSE should have 2800)
+                                   caget <DATA_SOURCE>HST<n>    (should not have a nan)
+                                   caget <DATA_SOURCE>RMSHST<n>  (sould have nan always)
+                                   caget <DATA_SOURCE>CNTHST<n>    (should have 1 always)
+                                   caget <DATA_SOURCE>PIDHST<n>    (should increased by 3 p, p+3, p+6, p+3,....)
+                                   
+
+----------------------------------------------
+120Hz data + 120Hz acquiriing, average 3 times
+----------------------------------------------
+1. reserve an EDEF
+2. assume EDEF <N> is resereved
+3. make 120Hz acquisition
+                                   caput EDEF:SYS0:<n>:EXCLUSION1 0x36 
+                                   caput EDEF:SYS0:<n>:EXCLUSION[2..5] 0
+                                   caput EDEF:SYS0:<n>:INCLUSION[1..5] 0
+                                   caput EDEF:SYS0:<n>:BEAMCODE 0
+4. set average, and max measure counter
+                                   caput EDEF:SYS0:<n>:AVGCNT 3
+                                   caput EDEF:SYS0:<n>:MEASCNT 2800
+5. start acquisition               caput EDEF:SYS0:<n>:CTRL "ON"
+6. wait until the acquisition is completed
+                                   camonitor EDEF:SYS0:<n>:CTRL     (until it turns to off)
+7. check up the total acquire
+                                   caget EDEF:SYS0:<n>:CNT      (should be 8400 = 3 * 2800) 
+8. check up the history buffer 
+                                   caget <DATA_SOURCE>.NUSE     (the NUSE should have 2800)
+                                   caget <DATA_SOURCE>HST<n>    (should not have a nan)
+                                   caget <DATA_SOURCE>RMSHST<n>  (should not have a nan)
+                                   caget <DATA_SOURCE>CNTHST<n>    (should have 3 always)
+                                   caget <DATA_SOURCE>PIDHST<n>    (should increased by 9 p, p+9, p+18, p+27,....)
+                                   
+                                   
+                                                                      
+                                    
