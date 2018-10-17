@@ -1,5 +1,8 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
+R1.4.5: 2018-10-15 Kukhee Kim (KHKIM)
+        * build against BsaCore R1.5.0
+
 R1.4.4: 2018-08-18 Kukhee Kim (KHKIM)
         * bsaRecord.c, bsaRecord.dbd: send monitors on NORD change
         * add epicsTimeERROR macro in evrTime.c due to it is removed from epics 7
