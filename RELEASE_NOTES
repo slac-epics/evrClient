@@ -1,5 +1,8 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
+R1.4.6: 2018-11-02 Kukhee Kim (KHKIM)
+        * build against BsaCore R1.5.1
+
 R1.4.5: 2018-10-15 Kukhee Kim (KHKIM)
         * build against BsaCore R1.5.0
 
