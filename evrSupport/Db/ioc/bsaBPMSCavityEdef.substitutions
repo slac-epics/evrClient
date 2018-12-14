@@ -20,10 +20,10 @@
 file bsaATTREdef.db
 {
 #           Device   Attribute  Input          EGU   HOPR  LOPR PREC ADEL  Link
-  pattern {   D       , ATTR , I             , EG ,  HO  , LO , PR , AD  ,  LNK             }
-	  { $(DEVICE) , URER ,$(DEVICE):URER , "" ,   0  ,  0 , 1 ,  0   , $(DEVICE):EFUIMR }
-	  { $(DEVICE) , UIMR ,$(DEVICE):UIMR , "" ,   0  ,  0 , 1 ,  0   , $(DEVICE):EFVRER }
-	  { $(DEVICE) , VRER ,$(DEVICE):VRER , "" ,   0  ,  0 , 1 ,  0   , $(DEVICE):EFVIMR }
-	  { $(DEVICE) , VIMR ,$(DEVICE):VIMR , "" ,   0  ,  0 , 1 ,  0   , $(DEVICE):EFREFR }
-	  { $(DEVICE) , REFR ,$(DEVICE):REFR , "" ,   0  ,  0 , 1 ,  0   , $(SLCLNK)        }
+  pattern {   D       , ATTR , I             , EG ,  HO  , LO , PR , AD  ,  LNK,              SINK_SIZE }
+	  { $(DEVICE) , URER ,$(DEVICE):URER , "" ,   0  ,  0 , 1 ,  0   , $(DEVICE):EFUIMR, $(SINK_SIZE\=10) }
+	  { $(DEVICE) , UIMR ,$(DEVICE):UIMR , "" ,   0  ,  0 , 1 ,  0   , $(DEVICE):EFVRER, $(SINK_SIZE\=10) }
+	  { $(DEVICE) , VRER ,$(DEVICE):VRER , "" ,   0  ,  0 , 1 ,  0   , $(DEVICE):EFVIMR, $(SINK_SIZE\=10) }
+	  { $(DEVICE) , VIMR ,$(DEVICE):VIMR , "" ,   0  ,  0 , 1 ,  0   , $(DEVICE):EFREFR, $(SINK_SIZE\=10) }
+	  { $(DEVICE) , REFR ,$(DEVICE):REFR , "" ,   0  ,  0 , 1 ,  0   , $(SLCLNK),        $(SINK_SIZE\=10) }
 }
