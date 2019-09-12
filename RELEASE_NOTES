@@ -1,5 +1,8 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
+R1.4.7: 2019-09-11 Kukhee Kim (KHKIM)
+        * build against BsaCore R1.5.2
+
 R1.4.6: 2018-11-02 Kukhee Kim (KHKIM)
         * build against BsaCore R1.5.1
         * make all template have SINK_SIZE=10 as a default
