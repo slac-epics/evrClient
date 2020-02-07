@@ -22,7 +22,7 @@ record(bsa, "$(DEV):$(SECN)$(MDID)") {
   field(VRES, "$(DEV):$(SECN)HST$(MDID).RES")
   field(CRES, "$(DEV):$(SECN)CNTHST$(MDID).RES")
   field(RRES, "$(DEV):$(SECN)RMSHST$(MDID).RES")
-  field(PRES, "$(DEV):$(SECN)PIDHST$(MDID).RES")
+#  field(PRES, "$(DEV):$(SECN)PIDHST$(MDID).RES")
 }
 
 record(compress, "$(DEV):$(SECN)HST$(MDID)") {
@@ -58,29 +58,29 @@ record(compress, "$(DEV):$(SECN)RMSHST$(MDID)") {
   field(LOPR, "$(LOPR)")
   field(EGU, "$(EGU)")
   field(TSEL, "$(DEV):$(SECN)$(MDID).TIME")
-  field(FLNK, "$(DEV):$(SECN)PIDHST$(MDID)")
+#  field(FLNK, "$(DEV):$(SECN)PIDHST$(MDID)")
 }
  
-record(compress, "$(DEV):$(SECN)PIDHST$(MDID)") {
-  field(DESC, "HST Lo Pulse ID-EDEF $(DESC)")
-  field(INP, "$(DEV):$(SECN)$(MDID).PID")
-  field(ALG, "Circular Buffer")
-  field(NSAM, "$(NSAM)")
-  field(HOPR, "131039")
-  field(LOPR, "0")
-  field(TSEL, "$(DEV):$(SECN)$(MDID).TIME")
-  field(FLNK, "$(DEV):$(SECN)PIDUHST$(MDID)")
-}
+# record(compress, "$(DEV):$(SECN)PIDHST$(MDID)") {
+#  field(DESC, "HST Lo Pulse ID-EDEF $(DESC)")
+#  field(INP, "$(DEV):$(SECN)$(MDID).PID")
+#  field(ALG, "Circular Buffer")
+#  field(NSAM, "$(NSAM)")
+#  field(HOPR, "131039")
+#  field(LOPR, "0")
+#  field(TSEL, "$(DEV):$(SECN)$(MDID).TIME")
+#  field(FLNK, "$(DEV):$(SECN)PIDUHST$(MDID)")
+# }
 
-record(compress, "$(DEV):$(SECN)PIDUHST$(MDID)") {
-  field(DESC, "HST Hi Pulse ID-EDEF $(DESC)")
-  field(INP, "$(DEV):$(SECN)$(MDID).PIDU")
-  field(ALG, "Circular Buffer")
-  field(NSAM, "$(NSAM)")
-  field(HOPR, "131039")
-  field(LOPR, "0")
-  field(TSEL, "$(DEV):$(SECN)$(MDID).TIME")
-}
+# record(compress, "$(DEV):$(SECN)PIDUHST$(MDID)") {
+#  field(DESC, "HST Hi Pulse ID-EDEF $(DESC)")
+#  field(INP, "$(DEV):$(SECN)$(MDID).PIDU")
+#  field(ALG, "Circular Buffer")
+#  field(NSAM, "$(NSAM)")
+#  field(HOPR, "131039")
+#  field(LOPR, "0")
+#  field(TSEL, "$(DEV):$(SECN)$(MDID).TIME")
+# }
 
 
 #! Further lines contain data used by VisualDCT
