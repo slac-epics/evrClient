@@ -1,5 +1,16 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
+R1.5.0: 2020-02-07 Kukhee Kim (KHKIM)
+        * redefine system EDEFs (CUH and CUS)
+        * default SINK_SIZE (10 for user EDEFs an 1 for system EDEFs)
+        * drop pulse id history buffer (comprees records) in BSA
+        * build with:
+          buildroot-2019.08
+          evrmaDriver R1.0.9 (kernel module)
+          evrma       R1.0.9 (api)
+          BsaCore     R1.5.3 (epics module)
+
+
 R1.4.7: 2019-09-11 Kukhee Kim (KHKIM)
         * build against BsaCore R1.5.2
 
