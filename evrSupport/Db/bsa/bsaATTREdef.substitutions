@@ -28,13 +28,13 @@ file bsaEdefAvg.db
 	  { $(D) ,$(ATTR), $(I),  9    , 9,  9  ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=10) }
 	  { $(D) ,$(ATTR), $(I),  10   ,10,  10 ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=10) }
 	  { $(D) ,$(ATTR), $(I),  11   ,11,  11 ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=10) }
-	  { $(D) ,$(ATTR), $(I),  1HZ  ,12,  1H ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
-	  { $(D) ,$(ATTR), $(I),  10HZ ,13,  TH ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
-	  { $(D) ,$(ATTR), $(I),  FULL ,14,  BR ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
-	  { $(D) ,$(ATTR), $(I),  CUS1H,15,  CUS1H ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800. $(SINK_SIZE\=1) }
-	  { $(D) ,$(ATTR), $(I),  CUSTH,16,  CUSTH ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
-	  { $(D) ,$(ATTR), $(I),  CUSBR,17,  CUSBR ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
-	  { $(D) ,$(ATTR), $(I),  CUH1H,18,  CUH1H ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
+	  { $(D) ,$(ATTR), $(I),  CUS1H,12,  CUS1H ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
+	  { $(D) ,$(ATTR), $(I),  CUSTH,13,  CUSTH ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
+	  { $(D) ,$(ATTR), $(I),  CUSBR,14,  CUSBR ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
+	  { $(D) ,$(ATTR), $(I),  CUH1H,15,  CUS1H ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800. $(SINK_SIZE\=1) }
+	  { $(D) ,$(ATTR), $(I),  1H   ,16,  1H    ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
+	  { $(D) ,$(ATTR), $(I),  TH   ,17,  TH    ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
+	  { $(D) ,$(ATTR), $(I),  BR   ,18,  BR    ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
 	  { $(D) ,$(ATTR), $(I),  CUHTH,19,  CUHTH ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
 	  { $(D) ,$(ATTR), $(I),  CUHBR,20,  CUHBR ,$(EG) ,$(HO),$(LO),$(PR),$(AD),  2800, $(SINK_SIZE\=1) }
 }

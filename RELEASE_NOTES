@@ -1,5 +1,9 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
+R1.5.0: 2020-02-13 Kukhee Kim (KHKIM)
+        * force tag R1.5.0
+        * update the order of system EDEFs for invairiant name (1H, TH, BR)
+
 R1.5.0: 2020-02-07 Kukhee Kim (KHKIM)
         * redefine system EDEFs (CUH and CUS)
         * default SINK_SIZE (10 for user EDEFs an 1 for system EDEFs)
