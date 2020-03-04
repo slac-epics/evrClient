@@ -10,6 +10,7 @@
 -----------------------------------------------------------------------------*/
 #include "copyright_SLAC.h"    
 /*----------------------------------------------------------------------------- 
+
   Mod:  (newest to oldest)  
         DD-MMM-YYYY, My Name:
            Changed such and such to so and so. etc. etc.
@@ -41,8 +42,10 @@ extern "C" {
 /* Bits in modifier 2                                                  */
 #define MOD2_IDX                1  
 #define EVG_BURST               (0x00000040)  /*Single-shot/burst pulse*/
-#define KICKER_LI25             (0x10000000)  /* BXKIK trigger         */
-#define KICKER_LTU              (0x20000000)  /* BYKIK trigger         */
+#define EVG_HXR_BURST		(0x00000100)  /* BYKIK HXR Burst pulse */
+#define EVG_SXR_BURST		(0x00000200)  /* BYKIKS SXR Burst pulse*/
+#define BYKIKS                  (0x10000000)  /* BYKIKS trigger        */
+#define BYKIK                   (0x20000000)  /* BYKIK trigger         */
 #define TCAV3_PERM              (0x40000000)  /* TCAV3                 */
 /* Mask used to decode timeslot 1 to 6 from modifier2   */
 #define TIMESLOT_MASK           (0x0000003F)  /* timeslot   mask       */
@@ -56,6 +59,26 @@ extern "C" {
 #define MOD3_IDX                2  
 #define POCKCEL_PERM            (0x00080000)  /* Pockels cell permit   */
 #define TCAV0_PERM              (0x80000000)  /* TCAV0                 */
+//CLTS Project MPS Modifier Bits to set rates to two destinations:
+/* Masks defined for CLTS timing MPS communication */
+#define RATE_MPS_HXR_119HZ    (0x00000001)  /* RATE_MPS_HXR_119HZ  BITP 64   */
+#define RATE_MPS_HXR_110HZ    (0x00000002)  /* RATE_MPS_HXR_110HZ  BITP 65   */
+#define RATE_MPS_HXR_90HZ     (0x00000004)  /* RATE_MPS_HXR_90HZ   BITP 66   */
+#define RATE_MPS_HXR_60HZ     (0x00000008)  /* RATE_MPS_HXR_60HZ   BITP 67   */
+#define RATE_MPS_HXR_30HZ     (0x00000010)  /* RATE_MPS_HXR_30HZ   BITP 68   */
+#define RATE_MPS_HXR_10HZ     (0x00000020)  /* RATE_MPS_HXR_10HZ   BITP 69   */
+#define RATE_MPS_HXR_05HZ     (0x00000800)  /* RATE_MPS_HXR_05HZ   BITP 75   */
+#define RATE_MPS_HXR_01HZ     (0x00001000)  /* RATE_MPS_HXR_01HZ   BITP 76   */
+#define RATE_MPS_SXR_119HZ    (0x00002000)  /* RATE_ MPS_SXR_119HZ BITP 77   */
+#define RATE_MPS_SXR_110HZ    (0x00004000)  /* RATE_ MPS_SXR_110HZ BITP 78   */
+#define RATE_MPS_SXR_90HZ     (0x00008000)  /* RATE_ MPS_SXR_90HZ  BITP 79   */
+#define RATE_MPS_SXR_60HZ     (0x00020000)  /* RATE_ MPS_SXR_60HZ  BITP 81   */
+#define RATE_MPS_SXR_30HZ     (0x00040000)  /* RATE_ MPS_SXR_30HZ  BITP 82   */
+#define RATE_MPS_SXR_10HZ     (0x00100000)  /* RATE_ MPS_SXR_10HZ  BITP 84   */
+#define RATE_MPS_SXR_05HZ     (0x00200000)  /* RATE_ MPS_SXR_05HZ  BITP 85   */
+#define RATE_MPS_SXR_01HZ     (0x00400000)  /* RATE_ MPS_SXR_01HZ  BITP 86   */
+#define BKRCUS		      (0x00800000)  /* BKRCUS scheduled by EVGUI BITP 87*/
+
 /* Mask used to get timeslot value from modifier4       */
 #define MOD4_IDX                3  
 #define TIMESLOT_VAL_MASK       (0x00000007)  /* Time slot value mask  */
@@ -90,24 +113,13 @@ extern "C" {
 #define MPS_PERM_MASK           (0xFFF00000)  /* MPS Permit bits       */
 #define MPS_VALID               (0x00000001)  /* MPS Valid data        */
 
-#define MPS_DEST_POCKCELL_MASK  (0x00000002)  /* MPSDestinationPockelsCell             */
-#define MPS_DEST_MECHSHUT_MASK  (0x00000004)  /* MPSDestinationMechanicalShutter       */
-#define MPS_DEST_LHTRSHUT_MASK  (0x00000008)  /* MPSDestinationLaserHeaterShutter      */
-#define MPS_DEST_GUNSPECT_MASK  (0x00000010)  /* MPSDestinationGunSpectrometer         */
-#define MPS_DEST_YAGB1211_MASK  (0x00000020)  /* MPSDestinationYagBl211                */
-#define MPS_DEST_SABDUMP_MASK   (0x00000040)  /* MPSDestinationStraightAheadBeamDump   */
-#define MPS_DEST_TD11_MASK      (0x00000080)  /* MPSDestinationTd11                    */
-#define MPS_DEST_D2_MASK        (0x00000100)  /* MPSDestinationD2                      */
-#define MPS_DEST_52S12_MASK     (0x00000200)  /* MPSDestination52Sl2                   */
-#define MPS_DEST_BYKIKDMP_MASK  (0x00000400)  /* MPSDestinationBykikDump               */
-#define MPS_DEST_TDUND_MASK     (0x00000800)  /* MPSDestinationTdUnd                   */
-#define MPS_DEST_MAINDMP_MASK   (0x00001000)  /* MPSDestinationMainDump                */
-#define MPS_DEST_PHOTSHUT_MASK  (0x00002000)  /* MPSDestinationPhotonShutter           */
-#define MPS_DEST_EXPERIMT_MASK  (0x00004000)  /* MPSDestinationExperiment              */
+#define MPS_DEST_HXR_MASK   (0x00040000)  /* MPS Destination information to timing HXR  BITP 178 */
+#define MPS_DEST_SXR_MASK   (0x00080000)  /* MPS Destination information to timing SXR  BITP 179 */
 
 #define MPS_PERM_POCKCELL_MASK  (0x00100000)  /* MPSMitigationDevicePockelsCell        */
 #define MPS_PERM_MECHSHUT_MASK  (0x00200000)  /* MPSMitigationDeviceMechanicalShutter  */
 #define MPS_PERM_BYKIK_MASK     (0x00400000)  /* MPSMitigationDeviceBykik              */
+#define MPS_PERM_BYKIKS_MASK     (0x00000002)  /* MPSMitigationDeviceBykiks	       */	
 #define MPS_PERM_LHTRSHUT_MASK  (0x00800000)  /* MPSMitigationDeviceLaserHeaterShutter */
 
 /* VAL values set by pattern subroutines */
