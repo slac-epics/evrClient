@@ -1,0 +1,10 @@
+# iocAdmin Archive template
+# Format:
+# <PVNAME> <PERIOD> [ monitor ]
+
+# Archive these values only when they change
+
+$(DEV)1H        1 monitor
+$(DEV)CUH1H     1 monitor
+$(DEV)CUS1H     1 monitor
+

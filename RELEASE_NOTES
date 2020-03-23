@@ -3,6 +3,7 @@ Release Notes for the evrClient and event package
 R1.5.0  2020-03-23 Kukhee Kim (KHKM)
         * force tag R1.5.0
         * fix a typo in bsaATTREdef.substitutions
+        * add archive template
 
 R1.5.0  2020-03 04 Kukhee Kim (KHKIM)
         * force tag R1.5.0
