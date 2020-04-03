@@ -13,6 +13,6 @@
 file bsaATTREdef.db
 {
 #           Device   Attribute  Input  EGU   HOPR  LOPR PREC ADEL  Link
-  pattern {   D       , ATTR   , I   , EG ,  HO  , LO , PR , AD  ,  LNK,      SINK_SIZE  }
-	  { $(DEVICE) ,$(ATRB) ,$(IN), meV ,  0  ,  0 ,  3 , .01 , $(SLCLNK), $(SINK_SIZE\=10) }
+  pattern {   D       , ATTR   , I   , EG ,  HO  , LO , PR , AD  ,  LNK      }
+	  { $(DEVICE) ,$(ATRB) ,$(IN), meV ,  0  ,  0 ,  3 , .01 , $(SLCLNK) }
 }

@@ -12,7 +12,7 @@
 file bsaATTREdef.db
 {
 #           Device     Attribute       Input            EGU   HOPR  LOPR PREC ADEL  Link
-  pattern {   D       , ATTR     ,      I              , EG ,  HO , LO  , PR , AD ,  LNK,       SINK_SIZE }
-	  { $(DEVICE) ,$(ATB)RAW ,$(DEVICE):$(ATB)RAW  , "" , 300 , 100 ,  3 , 1  ,  "",        $(SINK_SIZE\=10)  }
-	  { $(DEVICE) ,$(ATB)IMAX,$(DEVICE):$(ATB)IMAX , A  , 300 , 100 ,  3 , 1  ,  $(SLCLNK), $(SINK_SIZE\=10)  }
+  pattern {   D       , ATTR     ,      I              , EG ,  HO , LO  , PR , AD ,  LNK       }
+	  { $(DEVICE) ,$(ATB)RAW ,$(DEVICE):$(ATB)RAW  , "" , 300 , 100 ,  3 , 1  ,  ""        }
+	  { $(DEVICE) ,$(ATB)IMAX,$(DEVICE):$(ATB)IMAX , A  , 300 , 100 ,  3 , 1  ,  $(SLCLNK) }
 }

@@ -21,10 +21,10 @@ file bsaGENEdef.db
 #                        to make an empty allocation for the forward link.
 
 {
-  pattern {DEVICE, ATRB, IN, EGU, HOPR, LOPR, PREC, ADEL, FLNK, SINK_SIZE }
+  pattern {DEVICE, ATRB, IN, EGU, HOPR, LOPR, PREC, ADEL, FLNK }
 
 # Generic: Substitute at run time in your st.cmd
-          { '$(DEVICE)', '$(ATRB)', '$(DEVICE):$(ATRB)', '$(EGU=)', '$(HOPR=)', '$(LOPR=)', '$(PREC=3)', '$(ADEL=)', '$(FLNK=)', '$(SINK_SIZE\=10)' }
+          { '$(DEVICE)', '$(ATRB)', '$(DEVICE):$(ATRB)', '$(EGU=)', '$(HOPR=)', '$(LOPR=)', '$(PREC=3)', '$(ADEL=)', '$(FLNK=)' }
 
 }
 
