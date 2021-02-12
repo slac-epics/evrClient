@@ -21,7 +21,7 @@
 # ==========================================================
 MISCUTILS_MODULE_VERSION	= R2.2.5
 TIMINGAPI_MODULE_VERSION        = R0.6
-BSACORE_MODULE_VERSION          = R1.5.3
+BSACORE_MODULE_VERSION          = R1.5.4
 
 # ==========================================================
 # Define module paths using pattern

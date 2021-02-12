@@ -1,5 +1,9 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
+
+R1.5.1  2021-02-12 Kukhee Kim (KHKIM)
+        * build with BsaCore R1.5.4
+
 R1.5.0  2020-04-02 Kukhee Kim (KHKIM)
         * force tag R1.5.0
         * fix overriding SINK_SIZE in the intermmeidate substitutions and templates
