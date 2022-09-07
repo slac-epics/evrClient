@@ -16,7 +16,7 @@ file bsaEdefAvg.db
 {
 #	      Device   Name                                                      Init 
 #                                                                                Event Code
-  pattern {  DEV ,  SECN , INP ,DESC   ,MD,MDID , EGU  ,HOPR ,LOPR ,PREC ,ADEL , EC , NSAM }
+  pattern {  DEV ,  SECN , INP ,DESC   ,MD,MDID , EGU  ,HOPR ,LOPR ,PREC ,ADEL , EC , NSAM, SIZE  }
 	  { $(D) ,$(ATTR), $(I),  1    , 1,  1  ,$(EG) ,$(HO),$(LO),$(PR),$(AD), 101, 2800, $(SINK_SIZE\=10) }
 	  { $(D) ,$(ATTR), $(I),  2    , 2,  2  ,$(EG) ,$(HO),$(LO),$(PR),$(AD), 102, 2800, $(SINK_SIZE\=10) }
 	  { $(D) ,$(ATTR), $(I),  3    , 3,  3  ,$(EG) ,$(HO),$(LO),$(PR),$(AD), 103, 2800, $(SINK_SIZE\=10) }
