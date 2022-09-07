@@ -3,7 +3,7 @@
 # Read definitions of:
 #	EPICS_SITE_TOP
 #	BASE_MODULE_VERSION
-#	EPICS_MODULES 
+#	EPICS_MODULES
 # from one of the following options
 -include $(TOP)/../../RELEASE_SITE
 -include $(TOP)/RELEASE_SITE
@@ -21,13 +21,13 @@
 # ==========================================================
 MISCUTILS_MODULE_VERSION	= R2.2.5
 TIMINGAPI_MODULE_VERSION        = R0.6
-BSACORE_MODULE_VERSION          = R1.5.4
+BSACORE_MODULE_VERSION          = R1.5.5
 
 # ==========================================================
 # Define module paths using pattern
 # FOO = $(EPICS_MODULES)/foo/$(FOO_MODULE_VERSION)
 #  or
-# FOO = /Full/Path/To/Development/Version 
+# FOO = /Full/Path/To/Development/Version
 # ==========================================================
 MISCUTILS	= $(EPICS_MODULES)/miscUtils/$(MISCUTILS_MODULE_VERSION)
 TIMINGAPI       = $(EPICS_MODULES)/timingApi/$(TIMINGAPI_MODULE_VERSION)
