@@ -4,8 +4,7 @@ O.RTEMS-mvme3100/
 O.RTEMS-uC5282/
 O.linux-x86/
 O.linux-x86_64/
-O.rhel6-x86_64/
-O.rhel7-x86_64/
+O.rhel*-x86_64/
 O.linuxRT-x86/
 O.linuxRT-x86_64/
 O.linuxRT_glibc-x86_64/
