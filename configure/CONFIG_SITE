@@ -40,3 +40,27 @@ HAVE_BSA_CORE=$(HAVE_BSA_CORE_$(OS_CLASS))
 
 EVR_DRIVER_SUPPORT_LINUX=YES
 
+ifdef T_A
+PKG_ARCH=$(T_A)
+endif
+
+# ===============================
+# Support for EVRMA Kernel Module
+# ===============================
+KERNEL_MODULE_EVRMA_PACKAGE_NAME = linuxKernel_Modules/evrmaDriver
+KERNEL_MODULE_EVRMA_VERSION      = R1.0.12
+KERNEL_MODULE_EVRMA              = $(PACKAGE_SITE_TOP)/$(KERNEL_MODULE_EVRMA_PACKAGE_NAME)/$(KERNEL_MODULE_EVRMA_VERSION)/$(PKG_ARCH)
+
+
+# ===========================
+# Support for EVRMA API layer
+# ===========================
+EVRMA_PACKAGE_NAME = evrma
+EVRMA_VERSION      = R1.0.12
+
+EVRMA= $(PACKAGE_SITE_TOP)/$(EVRMA_PACKAGE_NAME)/$(EVRMA_VERSION)/$(PKG_ARCH)
+
+EVRMA_LIB     = $(EVRMA)/lib
+EVRMA_INCLUDE = -I$(EVRMA)/include
+KERNEL_MODULE_EVRMA_INCLUDE = -I$(KERNEL_MODULE_EVRMA)/include
+
