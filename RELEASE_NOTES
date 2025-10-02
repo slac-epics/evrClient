@@ -1,8 +1,5 @@
 Release Notes for the evrClient and event package
 --------------------------------------------------
-R1.5.5  2025-06-12 Jane Liu (JLIU)
-		* Updated timingApi to R0.11
-
 R1.5.4  2025-01-29 Jeremy Lorelli (LORELLI)
         * Add support for rocky 9 and cleanup CONFIG_SITE files
         * Upgrade evrmaDriver, evrma to R1.0.12
